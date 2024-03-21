@@ -1,0 +1,18 @@
+syntax = "proto3";
+option go_package = "./codeExecutionpb";
+package codeexecutionpb;
+
+service CodeExecutionService {
+  rpc ExecuteCode(ExecuteCodeRequest) returns (ExecuteCodeResponse) {}
+}
+
+message ExecuteCodeRequest {
+  string language = 1;
+  string code = 2;
+  repeated string input_data = 3;
+}
+
+message ExecuteCodeResponse {
+  string output = 1;
+  int32 exit_code = 2;
+}
