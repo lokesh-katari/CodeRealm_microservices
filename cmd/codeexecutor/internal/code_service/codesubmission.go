@@ -11,7 +11,7 @@ import (
 	"lokesh-katari/code-realm/cmd/codeexecutor/internal/helpers"
 	"os"
 
-	"github.com/docker/docker/api/types"
+	// "github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
@@ -87,7 +87,7 @@ func CodeSubmission(resCode string, lang string) (string, error) {
 	// 	panic(err)
 	// }
 
-	if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+	if err := cli.ContainerStart(ctx, resp.ID, container.StartOptions{}); err != nil {
 		panic(err)
 	}
 	fmt.Println("container started successfully")
@@ -101,7 +101,7 @@ func CodeSubmission(resCode string, lang string) (string, error) {
 	case <-statusCh:
 	}
 
-	out, err := cli.ContainerLogs(ctx, resp.ID, types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true})
+	out, err := cli.ContainerLogs(ctx, resp.ID, container.LogsOptions{ShowStdout: true, ShowStderr: true})
 	if err != nil {
 		panic(err)
 	}
@@ -110,7 +110,7 @@ func CodeSubmission(resCode string, lang string) (string, error) {
 	if _, err := stdcopy.StdCopy(&buf, &buf, out); err != nil {
 		panic(err)
 	}
-	cli.ContainerRemove(ctx, resp.ID, types.ContainerRemoveOptions{})
+	// cli.ContainerRemove(ctx, resp.ID, types.ContainerRemoveOptions{})
 
 	// Convert the buffer content to a string
 	output := buf.String()
