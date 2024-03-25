@@ -32,7 +32,7 @@ type CodeExecutionResponse struct {
 var REDIS_URI = "redis://default:vjIGMyBfPrVKyR1l7F12Gf0SxvHofMmq@redis-10614.c13.us-east-1-3.ec2.cloud.redislabs.com:10614"
 
 func main() {
-	conn, err := grpc.Dial("localhost"+port, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial("code_exec"+port, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	opt, err := redis.ParseURL(REDIS_URI)
 	if err != nil {
