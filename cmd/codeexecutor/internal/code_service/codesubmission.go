@@ -110,7 +110,7 @@ func CodeSubmission(resCode string, lang string) (string, error) {
 	if _, err := stdcopy.StdCopy(&buf, &buf, out); err != nil {
 		panic(err)
 	}
-	// cli.ContainerRemove(ctx, resp.ID, types.ContainerRemoveOptions{})
+	cli.ContainerRemove(ctx, resp.ID, container.RemoveOptions{})
 
 	// Convert the buffer content to a string
 	output := buf.String()

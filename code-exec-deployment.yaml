@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.yaml
+    kompose.version: 1.32.0 (765fde254)
+  labels:
+    io.kompose.service: code-exec
+  name: code-exec
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: code-exec
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f docker-compose.yaml
+        kompose.version: 1.32.0 (765fde254)
+      labels:
+        io.kompose.network/kafka-network: "true"
+        io.kompose.service: code-exec
+    spec:
+      containers:
+        - image: lokeshkatari/coderealm-codeexec
+          name: code-exec
+          ports:
+            - containerPort: 50052
+              hostPort: 50052
+              protocol: TCP
+          securityContext:
+            privileged: true
+      restartPolicy: Always
