@@ -24,6 +24,32 @@ services:
     networks:
       - kafka-network
 
+  code_exec:
+    image: lokeshkatari/coderealm-codeexec
+    container_name: code_exec
+    ports:
+      - "50052:50052"
+    networks:
+      - kafka-network
+    restart: unless-stopped
+    privileged: true
+
+  code_client:
+    image: lokeshkatari/coderealm-client
+    container_name: code_client
+    networks:
+      - kafka-network
+    restart: unless-stopped
+
+  frontend:
+    image: codefrontend
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - kafka-network
+    restart: unless-stopped
+
 networks:
   kafka-network:
     external: true
