@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"lokesh-katari/code-realm/cmd/client/codeExecutionpb"
+	"lokesh-katari/code-realm/cmd/client/db"
+	"lokesh-katari/code-realm/cmd/client/models"
 	"time"
 
 	"encoding/json"
@@ -23,6 +25,9 @@ type CodeExecutionRequest struct {
 	Language string `json:"language"`
 	Code     string `json:"code"`
 	PID      string `json:"pid"`
+	ReqType  string `json:"reqType"`
+	QueID    string `json:"queId"`
+	Email    string `json:"email"`
 }
 
 type CodeExecutionResponse struct {
@@ -33,7 +38,7 @@ var REDIS_URI = "redis://default:vjIGMyBfPrVKyR1l7F12Gf0SxvHofMmq@redis-10614.c1
 
 func main() {
 	conn, err := grpc.Dial("code_exec"+port, grpc.WithTransportCredentials(insecure.NewCredentials()))
-
+	defer db.Client.Disconnect(context.TODO())
 	opt, err := redis.ParseURL(REDIS_URI)
 	if err != nil {
 		panic(err)
@@ -42,23 +47,29 @@ func main() {
 	rclient := redis.NewClient(opt)
 	pong, err := rclient.Ping(context.Background()).Result()
 	fmt.Println(pong, err)
-	reader := kafka.NewReader(kafka.ReaderConfig{
+	submissionreader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers: []string{"kafka:9092"},
-		Topic:   "code-exec-requests",
-		GroupID: "my-group",
+		Topic:   "code-submission-request",
+		GroupID: "submission-group",
 	})
-	defer reader.Close()
+
+	runreader := kafka.NewReader(kafka.ReaderConfig{
+		Brokers: []string{"kafka:9092"},
+		Topic:   "code-run-request",
+		GroupID: "run-group",
+	})
+	defer submissionreader.Close()
+	defer runreader.Close()
 
 	if err != nil {
 		log.Fatalf("Did not connect: %v", err)
 	}
 	defer conn.Close()
 
-	// client := codeExecutionpb.NewCodeExecutionServiceClient(conn)
-
 	codeExecutionChannel := make(chan CodeExecutionRequest)
 
-	go processMessages(reader, codeExecutionChannel)
+	go processMessages(submissionreader, codeExecutionChannel)
+	go processMessages(runreader, codeExecutionChannel)
 
 	for req := range codeExecutionChannel {
 		fmt.Println("Received code execution request", req)
@@ -97,7 +108,23 @@ func executeAndStore(rclient *redis.Client, conn *grpc.ClientConn, req CodeExecu
 		log.Printf("Error when calling ExecuteCode: %v", err)
 		return
 	}
-
+	if req.ReqType == "submit" {
+		_, err = db.SubmissionCollection.InsertOne(context.TODO(), models.CodeSubmission{
+			PID:         req.PID,
+			QueID:       req.QueID,
+			Email:       req.Email,
+			Language:    req.Language,
+			Code:        req.Code,
+			Output:      res.Output,
+			SubmittedAT: time.Now(),
+			Runtime:     "0",
+			Memory:      "0",
+		})
+		if err != nil {
+			log.Printf("Error storing submission in MongoDB: %v", err)
+		}
+		return // Do not store output in Redis
+	}
 	err = rclient.Set(context.Background(), req.PID, res.Output, 2*time.Minute).Err()
 	fmt.Println("Stored output in Redis")
 
