@@ -109,6 +109,7 @@ func executeAndStore(rclient *redis.Client, conn *grpc.ClientConn, req CodeExecu
 		return
 	}
 	if req.ReqType == "submit" {
+		fmt.Println("Storing submission in MongoDB", res, "this is res")
 		_, err = db.SubmissionCollection.InsertOne(context.TODO(), models.CodeSubmission{
 			PID:         req.PID,
 			QueID:       req.QueID,
@@ -125,7 +126,7 @@ func executeAndStore(rclient *redis.Client, conn *grpc.ClientConn, req CodeExecu
 		}
 		return // Do not store output in Redis
 	}
-	err = rclient.Set(context.Background(), req.PID, res.Output, 2*time.Minute).Err()
+	err = rclient.Set(context.Background(), req.PID, res.Output, 3*time.Minute).Err()
 	fmt.Println("Stored output in Redis")
 
 	if err != nil {

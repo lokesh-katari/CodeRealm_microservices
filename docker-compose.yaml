@@ -42,10 +42,11 @@ services:
     restart: unless-stopped
 
   frontend:
-    image: codefrontend
+    image: frontend
     container_name: frontend
     ports:
       - "3000:3000"
+      
     networks:
       - kafka-network
     restart: unless-stopped
