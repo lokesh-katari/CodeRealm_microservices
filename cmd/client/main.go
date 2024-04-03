@@ -48,13 +48,13 @@ func main() {
 	pong, err := rclient.Ping(context.Background()).Result()
 	fmt.Println(pong, err)
 	submissionreader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers: []string{"kafka:9092"},
+		Brokers: []string{"my-cluster-kafka-bootstrap.coderealm.svc:9092"},
 		Topic:   "code-submission-request",
 		GroupID: "submission-group",
 	})
 
 	runreader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers: []string{"kafka:9092"},
+		Brokers: []string{"my-cluster-kafka-bootstrap.coderealm.svc:9092"},
 		Topic:   "code-run-request",
 		GroupID: "run-group",
 	})
