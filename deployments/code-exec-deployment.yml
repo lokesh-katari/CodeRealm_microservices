@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: code-exec-deployment
+  namespace: coderealm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: code-exec
+  template:
+    metadata:
+      labels:
+        app: code-exec
+    spec:
+      containers:
+      - name: code-exec
+        image: lokeshkatari/coderealm-codeexec
+        ports:
+        - containerPort: 50052
+        resources:
+          limits:
+            cpu: "1"
+            memory: "512Mi"
+          requests:
+            cpu: "0.5"
+            memory: "256Mi"
+        securityContext:
+          privileged: true
+
+

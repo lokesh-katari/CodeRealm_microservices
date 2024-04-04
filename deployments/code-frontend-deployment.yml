@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: code-frontend-deployment
+  namespace: coderealm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: code-frontend
+  template:
+    metadata:
+      labels:
+        app: code-frontend
+    spec:
+      containers:
+      - name: code-frontend
+        image: lokeshkatari/coderealm-frontend
+        ports:
+        - containerPort: 3000
+        resources:
+          limits:
+            cpu: "1"
+            memory: "512Mi"
+          requests:
+            cpu: "0.5"
+            memory: "256Mi"
+
+
+

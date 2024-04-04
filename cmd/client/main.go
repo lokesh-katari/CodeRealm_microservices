@@ -37,24 +37,24 @@ type CodeExecutionResponse struct {
 var REDIS_URI = "redis://default:vjIGMyBfPrVKyR1l7F12Gf0SxvHofMmq@redis-10614.c13.us-east-1-3.ec2.cloud.redislabs.com:10614"
 
 func main() {
-	conn, err := grpc.Dial("code_exec"+port, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial("code-exec-service.coderealm.svc.cluster.local"+port, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	defer db.Client.Disconnect(context.TODO())
 	opt, err := redis.ParseURL(REDIS_URI)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
 	rclient := redis.NewClient(opt)
 	pong, err := rclient.Ping(context.Background()).Result()
 	fmt.Println(pong, err)
 	submissionreader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers: []string{"my-cluster-kafka-bootstrap.coderealm.svc:9092"},
+		Brokers: []string{"my-cluster-kafka-bootstrap:9092"},
 		Topic:   "code-submission-request",
 		GroupID: "submission-group",
 	})
 
 	runreader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers: []string{"my-cluster-kafka-bootstrap.coderealm.svc:9092"},
+		Brokers: []string{"my-cluster-kafka-bootstrap:9092"},
 		Topic:   "code-run-request",
 		GroupID: "run-group",
 	})
