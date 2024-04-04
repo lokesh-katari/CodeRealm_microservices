@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: code-frontend-service
+  namespace: coderealm
+spec:
+  selector:
+    app: code-frontend
+  ports:
+  - port: 80
+    targetPort: 3000
