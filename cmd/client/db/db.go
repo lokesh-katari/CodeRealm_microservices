@@ -35,7 +35,7 @@ func Connect() *mongo.Client {
 	}
 	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
 
-	CodeQueCollection = client.Database("coderealm_ms").Collection("codeQues")
+	CodeQueCollection = client.Database("coderealm_ms").Collection("CodeQues")
 	SubmissionCollection = client.Database("coderealm_ms").Collection("submissions")
 	// return client
 	return client

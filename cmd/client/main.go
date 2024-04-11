@@ -13,6 +13,8 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"github.com/segmentio/kafka-go"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -99,6 +101,18 @@ func processMessages(reader *kafka.Reader, ch chan<- CodeExecutionRequest) {
 func executeAndStore(rclient *redis.Client, conn *grpc.ClientConn, req CodeExecutionRequest) {
 	client := codeExecutionpb.NewCodeExecutionServiceClient(conn)
 
+	var problem models.Problem
+	// Declare the variable "problem"
+	if req.ReqType == "submit" {
+
+		opts := options.FindOne().SetProjection(bson.M{"templates." + req.Language: 1})
+		err := db.CodeQueCollection.FindOne(context.TODO(), bson.M{"problemId": req.QueID}, opts).Decode(&problem)
+		if err != nil {
+			log.Printf("Error finding problem in MongoDB: %v", err)
+			return
+		}
+		req.Code, err = GenerateCode(req.Language, req.Code, problem)
+	}
 	res, err := client.ExecuteCode(context.Background(), &codeExecutionpb.ExecuteCodeRequest{
 		Language:  req.Language,
 		Code:      req.Code,
