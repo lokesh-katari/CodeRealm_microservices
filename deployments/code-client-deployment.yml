@@ -18,7 +18,9 @@ spec:
         image: lokeshkatari/coderealm-client:latest
         env:
         - name: KAFKA_BOOTSTRAP_SERVERS
-          value: my-cluster-kafka-bootstrap.coderealm.svc.cluster.local:9092        
+          value: my-cluster-kafka-bootstrap:9092
+        - name: GRPC_SERVER
+          value: "code-exec-service.coderealm.svc.cluster.local"    
         resources:
           limits:
             cpu: "1"

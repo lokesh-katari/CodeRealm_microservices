@@ -1,0 +1,56 @@
+version: "2"
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    restart: unless-stopped
+    networks:
+      - kafka-network
+
+  kafka:
+    image: wurstmeister/kafka
+    container_name: kafka
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka # Use the container name as the advertised host name
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+    networks:
+      - kafka-network
+
+  code_exec:
+    image: lokeshkatari/coderealm-codeexec
+    container_name: code_exec
+    ports:
+      - "50052:50052"
+    networks:
+      - kafka-network
+    restart: unless-stopped
+    privileged: true
+
+  code_client:
+    image: lokeshkatari/coderealm-client
+    container_name: code_client
+    networks:
+      - kafka-network
+    restart: unless-stopped
+
+  frontend:
+    image: frontend
+    container_name: frontend
+    ports:
+      - "3000:3000"
+      
+    networks:
+      - kafka-network
+    restart: unless-stopped
+
+networks:
+  kafka-network:
+    external: true
