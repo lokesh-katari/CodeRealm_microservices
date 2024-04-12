@@ -11,16 +11,13 @@ import (
 	"os"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
 	"github.com/segmentio/kafka-go"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-)
-
-const (
-	port = ":50052"
 )
 
 type CodeExecutionRequest struct {
@@ -36,12 +33,18 @@ type CodeExecutionResponse struct {
 	Output string `json:"output"`
 }
 
-var REDIS_URI = "redis://default:vjIGMyBfPrVKyR1l7F12Gf0SxvHofMmq@redis-10614.c13.us-east-1-3.ec2.cloud.redislabs.com:10614"
+var REDIS_URI = os.Getenv("REDIS_URI")
 
 func main() {
-	conn, err := grpc.Dial(os.Getenv("GRPC_SERVER")+port, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	err := godotenv.Load()
+	if err != nil {
+		// Handle error loading .env file
+		panic(err)
+	}
+
+	conn, err := grpc.Dial(os.Getenv("GRPC_URI_CODE_CLIENT"), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	defer db.Client.Disconnect(context.TODO())
-	opt, err := redis.ParseURL(REDIS_URI)
+	opt, err := redis.ParseURL(os.Getenv("REDIS_URI"))
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -50,13 +53,13 @@ func main() {
 	pong, err := rclient.Ping(context.Background()).Result()
 	fmt.Println(pong, err)
 	submissionreader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers: []string{os.Getenv("KAFKA_BOOTSTRAP_SERVERS")},
+		Brokers: []string{os.Getenv("KAFKA_BROKER")},
 		Topic:   "code-submission-request",
 		GroupID: "submission-group",
 	})
 
 	runreader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers: []string{os.Getenv("KAFKA_BOOTSTRAP_SERVERS")},
+		Brokers: []string{os.Getenv("KAFKA_BROKER")},
 		Topic:   "code-run-request",
 		GroupID: "run-group",
 	})
@@ -111,12 +114,11 @@ func executeAndStore(rclient *redis.Client, conn *grpc.ClientConn, req CodeExecu
 			log.Printf("Error finding problem in MongoDB: %v", err)
 			return
 		}
-		req.Code, err = GenerateCode(req.Language, req.Code, problem)
+		// req.Code, err = GenerateCode(req.Language, req.Code, problem)
 	}
 	res, err := client.ExecuteCode(context.Background(), &codeExecutionpb.ExecuteCodeRequest{
-		Language:  req.Language,
-		Code:      req.Code,
-		InputData: []string{"hello world"},
+		Language: req.Language,
+		Code:     req.Code,
 	})
 	if err != nil {
 		log.Printf("Error when calling ExecuteCode: %v", err)

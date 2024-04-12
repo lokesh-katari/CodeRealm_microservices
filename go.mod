@@ -53,6 +53,7 @@ require (
 	github.com/golang/mock v1.6.0
 	// github.com/docker/docker v25.0.4+incompatible
 	github.com/golang/protobuf v1.5.4 // indirect
+	github.com/joho/godotenv v1.5.1
 	github.com/segmentio/kafka-go v0.4.47
 	github.com/stretchr/testify v1.9.0
 	go.mongodb.org/mongo-driver v1.14.0

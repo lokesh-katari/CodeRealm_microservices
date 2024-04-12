@@ -19,9 +19,6 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 
 	}
-
-	// Create service instance with the repository
-
 	s := grpc.NewServer()
 	server := codeservice.NewServer()
 	pb.RegisterCodeExecutionServiceServer(s, server)
