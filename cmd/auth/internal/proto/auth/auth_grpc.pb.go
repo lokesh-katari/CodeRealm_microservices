@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v3.12.4
-// source: cmd/auth/internal/proto/auth.proto
+// source: internal/proto/auth/auth.proto
 
 package auth
 
@@ -22,6 +22,7 @@ const (
 	AuthService_RegisterUser_FullMethodName = "/auth.AuthService/RegisterUser"
 	AuthService_LoginUser_FullMethodName    = "/auth.AuthService/LoginUser"
 	AuthService_LogoutUser_FullMethodName   = "/auth.AuthService/LogoutUser"
+	AuthService_GetUser_FullMethodName      = "/auth.AuthService/GetUser"
 )
 
 // AuthServiceClient is the client API for AuthService service.
@@ -31,6 +32,7 @@ type AuthServiceClient interface {
 	RegisterUser(ctx context.Context, in *RegisterUserRequest, opts ...grpc.CallOption) (*RegisterUserResponse, error)
 	LoginUser(ctx context.Context, in *LoginUserRequest, opts ...grpc.CallOption) (*LoginUserResponse, error)
 	LogoutUser(ctx context.Context, in *LogoutUserRequest, opts ...grpc.CallOption) (*LogoutUserResponse, error)
+	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
 }
 
 type authServiceClient struct {
@@ -68,6 +70,15 @@ func (c *authServiceClient) LogoutUser(ctx context.Context, in *LogoutUserReques
 	return out, nil
 }
 
+func (c *authServiceClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
+	out := new(GetUserResponse)
+	err := c.cc.Invoke(ctx, AuthService_GetUser_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServiceServer is the server API for AuthService service.
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility
@@ -75,6 +86,7 @@ type AuthServiceServer interface {
 	RegisterUser(context.Context, *RegisterUserRequest) (*RegisterUserResponse, error)
 	LoginUser(context.Context, *LoginUserRequest) (*LoginUserResponse, error)
 	LogoutUser(context.Context, *LogoutUserRequest) (*LogoutUserResponse, error)
+	GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -90,6 +102,9 @@ func (UnimplementedAuthServiceServer) LoginUser(context.Context, *LoginUserReque
 }
 func (UnimplementedAuthServiceServer) LogoutUser(context.Context, *LogoutUserRequest) (*LogoutUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LogoutUser not implemented")
+}
+func (UnimplementedAuthServiceServer) GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
 }
 func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
 
@@ -158,6 +173,24 @@ func _AuthService_LogoutUser_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).GetUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_GetUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).GetUser(ctx, req.(*GetUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -177,7 +210,11 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "LogoutUser",
 			Handler:    _AuthService_LogoutUser_Handler,
 		},
+		{
+			MethodName: "GetUser",
+			Handler:    _AuthService_GetUser_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "cmd/auth/internal/proto/auth.proto",
+	Metadata: "internal/proto/auth/auth.proto",
 }

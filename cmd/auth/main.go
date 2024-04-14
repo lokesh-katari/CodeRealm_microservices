@@ -21,11 +21,14 @@ func main() {
 	}
 
 	userRepo, err := auth.NewPostgresUserRepository()
+	jwtManager := auth.NewJWTManager("secret")
 
-	// Create service instance with the repository
-	authService := auth.NewAuthServiceImpl(userRepo)
+	authService := auth.NewAuthServiceImpl(userRepo, jwtManager)
+	interceptor := auth.NewAuthInterceptor(jwtManager)
 	server := auth.NewServer(authService)
-	s := grpc.NewServer()
+	s := grpc.NewServer(
+		grpc.UnaryInterceptor(interceptor.Unary()),
+	)
 	pb.RegisterAuthServiceServer(s, server)
 	reflection.Register(s)
 	log.Println("gRPC server started at port 50051")

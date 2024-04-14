@@ -8,11 +8,23 @@ service AuthService {
   rpc RegisterUser(RegisterUserRequest) returns (RegisterUserResponse) {}
   rpc LoginUser(LoginUserRequest) returns (LoginUserResponse) {}
   rpc LogoutUser(LogoutUserRequest) returns (LogoutUserResponse) {}
+  rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
+
 }
+
+message GetUserRequest {
+  string token = 1;
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
 
 message RegisterUserRequest {
   string email = 1;
   string password = 2;
+  string name = 3;
 }
 
 message RegisterUserResponse {
@@ -32,6 +44,7 @@ message LoginUserResponse {
 message User {
   string email = 1;
   string name = 2;
+  
 }
 message LogoutUserRequest {
   string token = 1;

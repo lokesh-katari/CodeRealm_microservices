@@ -3,9 +3,9 @@ package authservice
 import (
 	"context"
 	"fmt"
-	"log"
-
 	pb "lokesh-katari/code-realm/cmd/auth/internal/proto/auth"
+
+	"log"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -13,6 +13,7 @@ import (
 
 type Server struct {
 	// pb.UnimplementedAuthServiceServer
+
 	pb.AuthServiceServer
 	authservice    AuthService
 	UserRepository PostgresUserRepository
@@ -63,4 +64,17 @@ func (s *Server) LogoutUser(ctx context.Context, req *pb.LogoutUserRequest) (*pb
 		Success: true,
 	}, nil
 
+}
+
+func (s *Server) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.GetUserResponse, error) {
+	user, err := s.authservice.GetUser(ctx, req.Token)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Error getting user: %v", err)
+	}
+	return &pb.GetUserResponse{
+		User: &pb.User{
+			Email: user.Email,
+			Name:  user.Username,
+		},
+	}, nil
 }

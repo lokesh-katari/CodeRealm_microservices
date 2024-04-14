@@ -76,7 +76,7 @@ static_resources:
               - endpoint:
                   address:
                     socket_address:
-                      address: host.docker.internal
+                      address: authgrpc
                       port_value: 50051
       http2_protocol_options: {} # Force HTTP/2
       # Your grpc server communicates over TLS. You must configure the transport

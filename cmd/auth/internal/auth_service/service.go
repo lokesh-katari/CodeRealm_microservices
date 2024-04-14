@@ -11,15 +11,17 @@ type AuthService interface {
 	RegisterUser(ctx context.Context, email, password string) (*User, error)
 	LoginUser(ctx context.Context, email, password string) (string, error)
 	LogoutUser(ctx context.Context, token string) error
+	GetUser(ctx context.Context, token string) (*User, error)
 }
 
 type AuthServiceImpl struct {
-	userRepo UserRepository
+	userRepo   UserRepository
+	jwtManager *JWTManager
 }
 
 // NewAuthServiceImpl creates a new AuthServiceImpl
-func NewAuthServiceImpl(userRepo UserRepository) *AuthServiceImpl {
-	return &AuthServiceImpl{userRepo: userRepo}
+func NewAuthServiceImpl(userRepo UserRepository, jwtManager *JWTManager) *AuthServiceImpl {
+	return &AuthServiceImpl{userRepo: userRepo, jwtManager: jwtManager}
 }
 
 // RegisterUser handles user registration
@@ -76,6 +78,29 @@ func (s *AuthServiceImpl) LoginUser(ctx context.Context, email, password string)
 func (s *AuthServiceImpl) LogoutUser(ctx context.Context, token string) error {
 
 	return nil
+}
+
+func (s *AuthServiceImpl) GetUser(ctx context.Context, token string) (*User, error) {
+	// Verify the JWT token
+	claims, err := s.jwtManager.VerifyJWT(token)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get the user ID from the claims
+	// userID, ok := claims["user_id"].(string)
+	userEmail, ok := claims["email"].(string)
+	if !ok {
+		return nil, errors.New("invalid user ID")
+	}
+
+	// Get the user from the repository
+	user, err := s.userRepo.GetUserByEmail(userEmail)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 // Add other service method implementations as needed

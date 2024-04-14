@@ -24,6 +24,7 @@ type User struct {
 type UserRepository interface {
 	CreateUser(user *User) error
 	GetUserByEmail(email string) (*User, error)
+
 	// Add other repository methods as needed
 }
 
@@ -48,8 +49,10 @@ func (u *User) GenerateJWT() (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 	claims["authorized"] = true
+	claims["user_id"] = u.ID
+	claims["email"] = u.Email
 	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
-	tokenString, err := token.SignedString([]byte("your-secret-key"))
+	tokenString, err := token.SignedString([]byte("secret"))
 	if err != nil {
 		return "", err
 	}
