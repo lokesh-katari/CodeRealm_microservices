@@ -84,7 +84,7 @@ func (interceptor *AuthInterceptor) Unary() grpc.UnaryServerInterceptor {
 		handler grpc.UnaryHandler,
 	) (interface{}, error) {
 		log.Println("--> unary interceptor: ", info.FullMethod)
-		if info.FullMethod == "/auth.AuthService/LoginUser" {
+		if info.FullMethod == "/auth.AuthService/LoginUser" || info.FullMethod == "/auth.AuthService/RegisterUser" {
 			return handler(ctx, req)
 		}
 
