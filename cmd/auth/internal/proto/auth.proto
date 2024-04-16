@@ -44,6 +44,10 @@ message LoginUserResponse {
 message User {
   string email = 1;
   string name = 2;
+  int32 Easy_Problem_count = 3;
+  int32 Medium_Problem_count = 4;
+  int32 Hard_Problem_count  = 5;
+  repeated string solved_problems = 6;
   
 }
 message LogoutUserRequest {

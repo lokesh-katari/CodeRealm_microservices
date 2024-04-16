@@ -26,29 +26,34 @@ func NewServer(authservice AuthService) *Server {
 }
 
 func (s *Server) RegisterUser(ctx context.Context, req *pb.RegisterUserRequest) (*pb.RegisterUserResponse, error) {
-	user, err := s.authservice.RegisterUser(ctx, req.Email, req.Password)
+	user, err := s.authservice.RegisterUser(ctx, req.Name, req.Email, req.Password)
 	fmt.Println("user", user, req, "this is request")
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to register user: %v", err)
 	}
+	token, err := user.GenerateJWT()
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to generate token: %v", err)
+	}
+
 	return &pb.RegisterUserResponse{
-		Token: user.Email,
+		Token: token,
 		User: &pb.User{
 			Email: user.Email,
-			Name:  user.Username,
+			Name:  user.Name,
 		},
 	}, nil
 
 }
 func (s *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (*pb.LoginUserResponse, error) {
 
-	user, err := s.authservice.LoginUser(ctx, req.Email, req.Password)
+	token, err := s.authservice.LoginUser(ctx, req.Email, req.Password)
 
 	if err != nil {
 		log.Println("error in the login user", err)
 	}
 	return &pb.LoginUserResponse{
-		Token: user,
+		Token: token,
 	}, nil
 }
 
@@ -67,14 +72,19 @@ func (s *Server) LogoutUser(ctx context.Context, req *pb.LogoutUserRequest) (*pb
 }
 
 func (s *Server) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.GetUserResponse, error) {
+	fmt.Println("this is get user request", req.Token)
 	user, err := s.authservice.GetUser(ctx, req.Token)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Error getting user: %v", err)
 	}
 	return &pb.GetUserResponse{
 		User: &pb.User{
-			Email: user.Email,
-			Name:  user.Username,
+			Email:               user.Email,
+			Name:                user.Name,
+			Easy_ProblemCount:   int32(user.Easy_Problem_count),
+			Medium_ProblemCount: int32(user.Medium_Problem_count),
+			Hard_ProblemCount:   int32(user.Hard_Problem_count),
+			SolvedProblems:      user.Submission,
 		},
 	}, nil
 }

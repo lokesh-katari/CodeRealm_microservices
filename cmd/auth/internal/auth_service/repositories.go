@@ -4,6 +4,8 @@ package authservice
 import (
 	"database/sql"
 	"fmt"
+	"log"
+	"strings"
 	"time"
 
 	"lokesh-katari/code-realm/cmd/auth/db"
@@ -14,10 +16,14 @@ import (
 )
 
 type User struct {
-	ID       int
-	Email    string
-	Password string
-	Username string
+	ID                   int
+	Email                string
+	Password             string
+	Name                 string
+	Easy_Problem_count   int
+	Medium_Problem_count int
+	Hard_Problem_count   int
+	Submission           []string
 }
 
 // UserRepository defines the interface for user data access operations
@@ -72,6 +78,7 @@ type PostgresUserRepository struct {
 
 // NewPostgresUserRepository creates a new PostgresUserRepository
 func NewPostgresUserRepository() (*PostgresUserRepository, error) {
+	log.Println("NewPostgresUserRepository")
 	db, err := db.InitializeDatabase()
 	if err != nil {
 		return nil, err
@@ -84,7 +91,7 @@ func (r *PostgresUserRepository) CreateUser(user *User) error {
 
 	user.GenerateHashPassword()
 	query := "INSERT INTO users (email, password, name) VALUES ($1, $2, $3)"
-	re, err := r.db.Exec(query, user.Email, user.Password, user.Username)
+	re, err := r.db.Exec(query, user.Email, user.Password, user.Name)
 	fmt.Println(re)
 	if err != nil {
 		return err
@@ -94,12 +101,13 @@ func (r *PostgresUserRepository) CreateUser(user *User) error {
 }
 
 func (r *PostgresUserRepository) GetUserByEmail(email string) (*User, error) {
-	query := "SELECT id, email, password, name FROM users WHERE email = $1"
+	query := "SELECT id, email, password, name, easy_problem_count, medium_problem_count, hard_problem_count, submissions FROM users WHERE email = $1"
 	row := r.db.QueryRow(query, email)
 	var user User
+	var submissionBytes []byte
 
 	// Scan the query result into the User object
-	err := row.Scan(&user.ID, &user.Email, &user.Password, &user.Username)
+	err := row.Scan(&user.ID, &user.Email, &user.Password, &user.Name, &user.Easy_Problem_count, &user.Medium_Problem_count, &user.Hard_Problem_count, &submissionBytes)
 	if err != nil {
 		// Check if the error is due to no rows being returned
 		if err == sql.ErrNoRows {
@@ -108,6 +116,7 @@ func (r *PostgresUserRepository) GetUserByEmail(email string) (*User, error) {
 		// Return any other error encountered during scanning
 		return nil, err
 	}
+	user.Submission = strings.Split(string(submissionBytes), ",")
 
 	// Return the User object
 	return &user, nil

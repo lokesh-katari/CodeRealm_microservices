@@ -2,13 +2,11 @@ package main
 
 import (
 	"log"
-	"net"
-
 	auth "lokesh-katari/code-realm/cmd/auth/internal/auth_service"
 	pb "lokesh-katari/code-realm/cmd/auth/internal/proto/auth"
+	"net"
 
 	"google.golang.org/grpc"
-
 	"google.golang.org/grpc/reflection"
 )
 
@@ -19,7 +17,7 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 
 	}
-
+	log.Println("Server started at port 50051")
 	userRepo, err := auth.NewPostgresUserRepository()
 	jwtManager := auth.NewJWTManager("secret")
 

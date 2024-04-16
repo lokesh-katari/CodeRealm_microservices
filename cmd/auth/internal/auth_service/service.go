@@ -4,11 +4,12 @@ package authservice
 import (
 	"context"
 	"errors"
+	"log"
 )
 
 // AuthService defines the interface for authentication operations
 type AuthService interface {
-	RegisterUser(ctx context.Context, email, password string) (*User, error)
+	RegisterUser(ctx context.Context, name, email, password string) (*User, error)
 	LoginUser(ctx context.Context, email, password string) (string, error)
 	LogoutUser(ctx context.Context, token string) error
 	GetUser(ctx context.Context, token string) (*User, error)
@@ -25,7 +26,7 @@ func NewAuthServiceImpl(userRepo UserRepository, jwtManager *JWTManager) *AuthSe
 }
 
 // RegisterUser handles user registration
-func (s *AuthServiceImpl) RegisterUser(ctx context.Context, email, password string) (*User, error) {
+func (s *AuthServiceImpl) RegisterUser(ctx context.Context, name, email, password string) (*User, error) {
 	// Check if the user already exists
 	existingUser, err := s.userRepo.GetUserByEmail(email)
 	if err != nil {
@@ -38,7 +39,8 @@ func (s *AuthServiceImpl) RegisterUser(ctx context.Context, email, password stri
 	// Create a new user
 	newUser := &User{
 		Email:    email,
-		Password: (password), // Hash the password before storing
+		Password: password,
+		Name:     name, // Hash the password before storing
 		// Add other user fields as needed
 	}
 
@@ -82,6 +84,7 @@ func (s *AuthServiceImpl) LogoutUser(ctx context.Context, token string) error {
 
 func (s *AuthServiceImpl) GetUser(ctx context.Context, token string) (*User, error) {
 	// Verify the JWT token
+	log.Println("this is token from get user", token)
 	claims, err := s.jwtManager.VerifyJWT(token)
 	if err != nil {
 		return nil, err

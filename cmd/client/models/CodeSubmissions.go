@@ -9,7 +9,7 @@ import (
 type CodeSubmission struct {
 	ID          primitive.ObjectID `bson:"_id,omitempty"`
 	PID         string             `json:"pid"`
-	QueID       string             `json:"queId"`
+	QueID       primitive.ObjectID `bson:"queId,omitempty"`
 	Email       string             `json:"email"`
 	Language    string             `json:"language"`
 	Code        string             `json:"code"`

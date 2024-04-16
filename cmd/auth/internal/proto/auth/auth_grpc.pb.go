@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v3.12.4
-// source: internal/proto/auth/auth.proto
+// source: internal/proto/auth.proto
 
 package auth
 
@@ -216,5 +216,5 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "internal/proto/auth/auth.proto",
+	Metadata: "internal/proto/auth.proto",
 }

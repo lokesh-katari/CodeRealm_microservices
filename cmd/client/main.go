@@ -15,6 +15,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/segmentio/kafka-go"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -114,7 +115,8 @@ func executeAndStore(rclient *redis.Client, conn *grpc.ClientConn, req CodeExecu
 			log.Printf("Error finding problem in MongoDB: %v", err)
 			return
 		}
-		// req.Code, err = GenerateCode(req.Language, req.Code, problem)
+
+		req.Code, err = GenerateCode(req.Language, req.Code, problem)
 	}
 	res, err := client.ExecuteCode(context.Background(), &codeExecutionpb.ExecuteCodeRequest{
 		Language: req.Language,
@@ -126,9 +128,15 @@ func executeAndStore(rclient *redis.Client, conn *grpc.ClientConn, req CodeExecu
 	}
 	if req.ReqType == "submit" {
 		fmt.Println("Storing submission in MongoDB", res, "this is res")
+		queID, err := primitive.ObjectIDFromHex(req.QueID)
+
+		if err != nil {
+			log.Printf("Error converting QueID to ObjectID: %v", err)
+		}
+
 		_, err = db.SubmissionCollection.InsertOne(context.TODO(), models.CodeSubmission{
 			PID:         req.PID,
-			QueID:       req.QueID,
+			QueID:       queID,
 			Email:       req.Email,
 			Language:    req.Language,
 			Code:        req.Code,
