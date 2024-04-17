@@ -29,9 +29,8 @@ type TestCase struct {
 }
 
 // Problem represents a problem in the MongoDB document.
-type Problem struct {
+type CodeQue struct {
 	ID          primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	ProblemID   int                `json:"problemId" bson:"problemId"`
 	Difficulty  string             `json:"difficulty" bson:"difficulty"`
 	Description string             `json:"description" bson:"description"`
 	Submissions Submission         `json:"submissions" bson:"submissions"`

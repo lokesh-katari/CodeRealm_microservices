@@ -5,7 +5,7 @@ import (
 	"lokesh-katari/code-realm/cmd/client/models"
 )
 
-func GenerateCode(language string, userCode string, problem models.Problem) (string, error) {
+func GenerateCode(language string, userCode string, problem models.CodeQue) (string, error) {
 	var finalCode string
 
 	switch language {

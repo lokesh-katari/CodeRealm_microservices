@@ -105,18 +105,18 @@ func processMessages(reader *kafka.Reader, ch chan<- CodeExecutionRequest) {
 func executeAndStore(rclient *redis.Client, conn *grpc.ClientConn, req CodeExecutionRequest) {
 	client := codeExecutionpb.NewCodeExecutionServiceClient(conn)
 
-	var problem models.Problem
+	var CodeQue models.CodeQue
 	// Declare the variable "problem"
 	if req.ReqType == "submit" {
 
 		opts := options.FindOne().SetProjection(bson.M{"templates." + req.Language: 1})
-		err := db.CodeQueCollection.FindOne(context.TODO(), bson.M{"problemId": req.QueID}, opts).Decode(&problem)
+		err := db.CodeQueCollection.FindOne(context.TODO(), bson.M{"problemId": req.QueID}, opts).Decode(&CodeQue)
 		if err != nil {
 			log.Printf("Error finding problem in MongoDB: %v", err)
 			return
 		}
 
-		req.Code, err = GenerateCode(req.Language, req.Code, problem)
+		req.Code, err = GenerateCode(req.Language, req.Code, CodeQue)
 	}
 	res, err := client.ExecuteCode(context.Background(), &codeExecutionpb.ExecuteCodeRequest{
 		Language: req.Language,
