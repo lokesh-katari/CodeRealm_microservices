@@ -8,12 +8,13 @@ type LanguageTemplate struct {
 	HiddenTestCode string `json:"hiddenTestCode"`
 }
 type Languages struct {
-	Python     LanguageTemplate `json:"python"`
-	JavaScript LanguageTemplate `json:"javascript"`
-	Golang     LanguageTemplate `json:"golang"`
-	Java       LanguageTemplate `json:"java"`
-	C          LanguageTemplate `json:"c"`
-	Cpp        LanguageTemplate `json:"cpp"`
+	ID         primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+	Python     LanguageTemplate   `json:"python"`
+	JavaScript LanguageTemplate   `json:"javascript"`
+	Golang     LanguageTemplate   `json:"golang"`
+	Java       LanguageTemplate   `json:"java"`
+	C          LanguageTemplate   `json:"c"`
+	Cpp        LanguageTemplate   `json:"cpp"`
 }
 
 // Submission represents the number of correct and wrong submissions.

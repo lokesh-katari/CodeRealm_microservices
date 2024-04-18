@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"lokesh-katari/code-realm/cmd/client/codeExecutionpb"
@@ -127,27 +128,14 @@ func executeAndStore(rclient *redis.Client, conn *grpc.ClientConn, req CodeExecu
 		return
 	}
 	if req.ReqType == "submit" {
+		var data map[string]interface{}
+		if err := json.Unmarshal([]byte(res.Output), &data); err != nil {
+			// Handle error
+			log.Printf("Error unmarshaling JSON: %v", err)
+		}
 		fmt.Println("Storing submission in MongoDB", res, "this is res")
-		queID, err := primitive.ObjectIDFromHex(req.QueID)
-
-		if err != nil {
-			log.Printf("Error converting QueID to ObjectID: %v", err)
-		}
-
-		_, err = db.SubmissionCollection.InsertOne(context.TODO(), models.CodeSubmission{
-			PID:         req.PID,
-			QueID:       queID,
-			Email:       req.Email,
-			Language:    req.Language,
-			Code:        req.Code,
-			Output:      res.Output,
-			SubmittedAT: time.Now(),
-			Runtime:     "0",
-			Memory:      "0",
-		})
-		if err != nil {
-			log.Printf("Error storing submission in MongoDB: %v", err)
-		}
+		status := data["status"].(bool)
+		err = InsertSubmissionsAndUpdateCodeQue(req.QueID, res.Output, req, status)
 		return // Do not store output in Redis
 	}
 	err = rclient.Set(context.Background(), req.PID, res.Output, 3*time.Minute).Err()
@@ -156,4 +144,49 @@ func executeAndStore(rclient *redis.Client, conn *grpc.ClientConn, req CodeExecu
 	if err != nil {
 		log.Printf("Error storing output in Redis: %v", err)
 	}
+}
+
+func InsertSubmissionsAndUpdateCodeQue(queId string, output string, req CodeExecutionRequest, status bool) error {
+	queID, err := primitive.ObjectIDFromHex(queId)
+	if err != nil {
+		return err
+	}
+	_, err = db.SubmissionCollection.InsertOne(context.TODO(), models.CodeSubmission{
+		PID:         req.PID,
+		QueID:       queID,
+		Email:       req.Email,
+		Language:    req.Language,
+		Code:        req.Code,
+		Output:      output,
+		SubmittedAT: time.Now(),
+		Runtime:     "0",
+		Memory:      "0",
+	})
+	if err != nil {
+		return err
+	}
+	UpdateCodeQue(queID, status)
+	return nil
+}
+
+func UpdateCodeQue(queID primitive.ObjectID, status bool) error {
+
+	var updateField string
+	if status {
+		updateField = "submissions.correct"
+	} else {
+		updateField = "submissions.wrong"
+	}
+
+	update := bson.M{"$inc": bson.M{updateField: 1}}
+
+	// UpdateOne updates a single document matching the filter.
+	result, err := db.CodeQueCollection.UpdateByID(context.Background(), queID, update)
+	if err != nil {
+		return err
+	}
+	if result.ModifiedCount == 0 {
+		return errors.New("no document updated")
+	}
+	return nil
 }

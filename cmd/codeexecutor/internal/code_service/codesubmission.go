@@ -10,6 +10,7 @@ import (
 	"log"
 	"lokesh-katari/code-realm/cmd/codeexecutor/internal/helpers"
 	"os"
+	"strings"
 
 	// "github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -115,11 +116,18 @@ func CodeSubmission(resCode string, lang string) (string, error) {
 	// Convert the buffer content to a string
 	output := buf.String()
 
+	var status bool
+	if strings.Contains(output, `"status": "true"`) {
+		status = true
+	} else if strings.Contains(output, `"status": "false"`) {
+		status = false
+	}
 	// Create a map to hold the JSON response
-	jsonResponse := map[string]string{
+	jsonResponse := map[string]interface{}{
 		"output": output,
 		"error":  "",
 		"lang":   code.Language,
+		"status": status,
 	}
 	jsonResponseBytes, err := json.Marshal(jsonResponse)
 	if err != nil {
