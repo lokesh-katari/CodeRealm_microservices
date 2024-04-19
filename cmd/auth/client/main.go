@@ -138,13 +138,15 @@ func main() {
 	defer cc2.Close()
 
 	client2 := auth.NewAuthServiceClient(cc2)
-	res2, err := client2.GetUser(context.Background(), &auth.GetUserRequest{
-		Token: initialToken,
+	res2, err := client2.UpdateUserSubmissions(context.Background(), &auth.UpdateUserSubmissionsRequest{
+		Token:      initialToken,
+		Queid:      "661fa6b218e230a331a2b428",
+		Difficulty: "hard",
 	})
 
 	if err != nil {
 		panic(err)
 	}
 
-	println(res2.User.GetEmail(), res2.User.GetName(), "htisfsdf")
+	println(res2.User.GetEmail(), res2.String(), "htisfsdf")
 }

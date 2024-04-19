@@ -9,6 +9,7 @@ service AuthService {
   rpc LoginUser(LoginUserRequest) returns (LoginUserResponse) {}
   rpc LogoutUser(LogoutUserRequest) returns (LogoutUserResponse) {}
   rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
+  rpc UpdateUserSubmissions(UpdateUserSubmissionsRequest) returns (UpdateUserSubmissionsResponse){}
 
 }
 
@@ -17,6 +18,15 @@ message GetUserRequest {
 }
 
 message GetUserResponse {
+  User user = 1;
+}
+message UpdateUserSubmissionsRequest {
+  string token = 1;
+  string queid =2;
+  string Difficulty = 3;
+}
+
+message UpdateUserSubmissionsResponse {
   User user = 1;
 }
 

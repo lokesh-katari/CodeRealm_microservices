@@ -12,8 +12,6 @@ import (
 )
 
 type Server struct {
-	// pb.UnimplementedAuthServiceServer
-
 	pb.AuthServiceServer
 	authservice    AuthService
 	UserRepository PostgresUserRepository
@@ -77,7 +75,27 @@ func (s *Server) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.GetUs
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Error getting user: %v", err)
 	}
+
 	return &pb.GetUserResponse{
+		User: &pb.User{
+			Email:               user.Email,
+			Name:                user.Name,
+			Easy_ProblemCount:   int32(user.Easy_Problem_count),
+			Medium_ProblemCount: int32(user.Medium_Problem_count),
+			Hard_ProblemCount:   int32(user.Hard_Problem_count),
+			SolvedProblems:      user.Submission,
+		},
+	}, nil
+}
+
+func (s *Server) UpdateUserSubmissions(ctx context.Context, req *pb.UpdateUserSubmissionsRequest) (*pb.UpdateUserSubmissionsResponse, error) {
+	fmt.Println("this is get user request from usersubmissions", req.Token)
+	user, err := s.authservice.UpdateUserSubmissions(ctx, req.Token, req.Queid, req.Difficulty)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Error getting user: %v", err)
+	}
+
+	return &pb.UpdateUserSubmissionsResponse{
 		User: &pb.User{
 			Email:               user.Email,
 			Name:                user.Name,

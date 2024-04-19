@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"strings"
+
+	// "strings"
 	"time"
 
 	"lokesh-katari/code-realm/cmd/auth/db"
@@ -30,6 +32,8 @@ type User struct {
 type UserRepository interface {
 	CreateUser(user *User) error
 	GetUserByEmail(email string) (*User, error)
+	UpdateUser(user *User) error
+	UpdateUserSubmissions(user *User, queId string, difficulty string) error
 
 	// Add other repository methods as needed
 }
@@ -116,8 +120,53 @@ func (r *PostgresUserRepository) GetUserByEmail(email string) (*User, error) {
 		// Return any other error encountered during scanning
 		return nil, err
 	}
-	user.Submission = strings.Split(string(submissionBytes), ",")
+	submissionStr := strings.Trim(string(submissionBytes), "{}")
 
+	// Split the string by comma to get individual elements
+	user.Submission = strings.Split(submissionStr, ",")
+
+	fmt.Println("user", user.Submission)
 	// Return the User object
 	return &user, nil
+}
+
+func (r *PostgresUserRepository) UpdateUser(user *User) error {
+	query := "UPDATE users SET email = $1, password = $2, name = $3, easy_problem_count = $4, medium_problem_count = $5, hard_problem_count = $6, submissions = $7 WHERE id = $8"
+	// submission := strings.Join(user.Submission, ",")
+	_, err := r.db.Exec(query, user.Email, user.Password, user.Name, user.Easy_Problem_count, user.Medium_Problem_count, user.Hard_Problem_count, user.ID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *PostgresUserRepository) UpdateUserSubmissions(user *User, queId string, difficulty string) error {
+	query := `
+	    UPDATE users
+	    SET submissions = CASE
+	        WHEN $1 = ANY(submissions) THEN submissions
+	        ELSE array_append(submissions, $1)
+	    END,
+		hard_problem_count = CASE
+		WHEN $3 = 'hard' AND $1 <> ALL(submissions) THEN hard_problem_count + 1
+		ELSE hard_problem_count
+	END,
+	medium_problem_count = CASE
+		WHEN $3 = 'medium' AND $1 <> ALL(submissions) THEN medium_problem_count + 1
+		ELSE medium_problem_count
+	END,
+	easy_problem_count = CASE
+		WHEN $3 = 'easy' AND $1 <> ALL(submissions) THEN easy_problem_count + 1
+		ELSE easy_problem_count
+	END
+	    WHERE id = $2;
+	`
+	fmt.Println(difficulty, queId, user.ID)
+	_, err := r.db.Exec(query, queId, user.ID, difficulty)
+	if err != nil {
+		return err
+	}
+	fmt.Println("success fully updated the user submission")
+
+	return nil
 }

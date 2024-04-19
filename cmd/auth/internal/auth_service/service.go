@@ -4,15 +4,16 @@ package authservice
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 )
 
-// AuthService defines the interface for authentication operations
 type AuthService interface {
 	RegisterUser(ctx context.Context, name, email, password string) (*User, error)
 	LoginUser(ctx context.Context, email, password string) (string, error)
 	LogoutUser(ctx context.Context, token string) error
 	GetUser(ctx context.Context, token string) (*User, error)
+	UpdateUserSubmissions(ctx context.Context, token string, queId string, difficulty string) (*User, error)
 }
 
 type AuthServiceImpl struct {
@@ -90,8 +91,6 @@ func (s *AuthServiceImpl) GetUser(ctx context.Context, token string) (*User, err
 		return nil, err
 	}
 
-	// Get the user ID from the claims
-	// userID, ok := claims["user_id"].(string)
 	userEmail, ok := claims["email"].(string)
 	if !ok {
 		return nil, errors.New("invalid user ID")
@@ -106,4 +105,31 @@ func (s *AuthServiceImpl) GetUser(ctx context.Context, token string) (*User, err
 	return user, nil
 }
 
-// Add other service method implementations as needed
+func (s *AuthServiceImpl) UpdateUserSubmissions(ctx context.Context, token string, queId string, difficulty string) (*User, error) {
+	// Verify the JWT token
+	fmt.Println("this is token from update user", queId)
+	claims, err := s.jwtManager.VerifyJWT(token)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get the user ID from the claims
+	userEmail, ok := claims["email"].(string)
+	if !ok {
+		return nil, errors.New("invalid user ID")
+	}
+
+	// Get the user from the repository
+	user, err := s.userRepo.GetUserByEmail(userEmail)
+	if err != nil {
+		return nil, err
+	}
+
+	// Update the user's submissions
+	err = s.userRepo.UpdateUserSubmissions(user, queId, difficulty)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
