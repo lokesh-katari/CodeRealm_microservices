@@ -12,6 +12,7 @@ import (
 var (
 	CodeQueCollection    *mongo.Collection
 	SubmissionCollection *mongo.Collection
+	TemplateCollection   *mongo.Collection
 )
 
 var MONGO_URI = "mongodb+srv://lokesh:21341A0571@cluster0.yh7v13e.mongodb.net/coderealm_ms?retryWrites=true&w=majority&appName=Cluster0"
@@ -37,6 +38,7 @@ func Connect() *mongo.Client {
 
 	CodeQueCollection = client.Database("coderealm_ms").Collection("CodeQues")
 	SubmissionCollection = client.Database("coderealm_ms").Collection("submissions")
+	TemplateCollection = client.Database("coderealm_ms").Collection("Templates")
 	// return client
 	return client
 }

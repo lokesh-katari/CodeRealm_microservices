@@ -106,18 +106,25 @@ func processMessages(reader *kafka.Reader, ch chan<- CodeExecutionRequest) {
 func executeAndStore(rclient *redis.Client, conn *grpc.ClientConn, req CodeExecutionRequest) {
 	client := codeExecutionpb.NewCodeExecutionServiceClient(conn)
 
-	var CodeQue models.CodeQue
-	// Declare the variable "problem"
-	if req.ReqType == "submit" {
+	var Template models.Templates
 
-		opts := options.FindOne().SetProjection(bson.M{"templates." + req.Language: 1})
-		err := db.CodeQueCollection.FindOne(context.TODO(), bson.M{"problemId": req.QueID}, opts).Decode(&CodeQue)
+	var CodeQue models.CodeQue
+	opts := options.FindOne().SetProjection(bson.M{"templates." + req.Language: 1})
+	err := db.CodeQueCollection.FindOne(context.TODO(), bson.M{"_id": req.QueID}, opts).Decode(&CodeQue)
+	if err != nil {
+		log.Printf("Error finding problem in MongoDB: %v", err)
+		return
+	}
+	// Declare the variable "problem"
+	if req.ReqType == "submit" || req.ReqType == "run" {
+
+		err := db.TemplateCollection.FindOne(context.TODO(), bson.M{"_id": CodeQue.TemplateID}).Decode(&Template)
 		if err != nil {
-			log.Printf("Error finding problem in MongoDB: %v", err)
+			log.Printf("Error finding template in MongoDB: %v", err)
 			return
 		}
 
-		req.Code, err = GenerateCode(req.Language, req.Code, CodeQue)
+		req.Code, err = GenerateCode(req.Language, req.Code, Template, req.ReqType)
 	}
 	res, err := client.ExecuteCode(context.Background(), &codeExecutionpb.ExecuteCodeRequest{
 		Language: req.Language,
@@ -127,16 +134,33 @@ func executeAndStore(rclient *redis.Client, conn *grpc.ClientConn, req CodeExecu
 		log.Printf("Error when calling ExecuteCode: %v", err)
 		return
 	}
-	if req.ReqType == "submit" {
+	if req.ReqType == "submit" || req.ReqType == "run" {
+		// Extract the runtime and status from the output
+		fmt.Println("Extracting output", "this is from the submit code client")
+
+		output, err := Seperateoutput(res.Output, req.Language)
+		if err != nil {
+			log.Printf("Error separating output: %v", err)
+		}
 		var data map[string]interface{}
-		if err := json.Unmarshal([]byte(res.Output), &data); err != nil {
+		if err := json.Unmarshal([]byte(output), &data); err != nil {
 			// Handle error
 			log.Printf("Error unmarshaling JSON: %v", err)
 		}
-		fmt.Println("Storing submission in MongoDB", res, "this is res")
+
 		status := data["status"].(bool)
-		err = InsertSubmissionsAndUpdateCodeQue(req.QueID, res.Output, req, status)
-		return // Do not store output in Redis
+		if req.ReqType == "submit" {
+			err = InsertSubmissionsAndUpdateCodeQue(req.QueID, res.Output, req, status, data["runtime"].(string), data["passedTestCases"].(string))
+			return // Do not store output in Redis
+
+		}
+
+		err = rclient.Set(context.Background(), req.PID, output, 3*time.Minute).Err()
+		if err != nil {
+			log.Printf("Error storing output in Redis: %v", err)
+		}
+		return
+
 	}
 	err = rclient.Set(context.Background(), req.PID, res.Output, 3*time.Minute).Err()
 	fmt.Println("Stored output in Redis")
@@ -146,7 +170,7 @@ func executeAndStore(rclient *redis.Client, conn *grpc.ClientConn, req CodeExecu
 	}
 }
 
-func InsertSubmissionsAndUpdateCodeQue(queId string, output string, req CodeExecutionRequest, status bool) error {
+func InsertSubmissionsAndUpdateCodeQue(queId string, output string, req CodeExecutionRequest, status bool, runtime string, testcases string) error {
 	queID, err := primitive.ObjectIDFromHex(queId)
 	if err != nil {
 		return err
@@ -159,8 +183,8 @@ func InsertSubmissionsAndUpdateCodeQue(queId string, output string, req CodeExec
 		Code:        req.Code,
 		Output:      output,
 		SubmittedAT: time.Now(),
-		Runtime:     "0",
-		Memory:      "0",
+		Runtime:     runtime,
+		Testcases:   testcases,
 	})
 	if err != nil {
 		return err

@@ -6,8 +6,9 @@ import "go.mongodb.org/mongo-driver/bson/primitive"
 type LanguageTemplate struct {
 	UserCode       string `json:"userCode"`
 	HiddenTestCode string `json:"hiddenTestCode"`
+	RunTestCode    string `json:"runTestCode"`
 }
-type Languages struct {
+type Templates struct {
 	ID         primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
 	Python     LanguageTemplate   `json:"python"`
 	JavaScript LanguageTemplate   `json:"javascript"`
@@ -22,19 +23,34 @@ type Submission struct {
 	Correct int `json:"correct"`
 	Wrong   int `json:"wrong"`
 }
+type TestCase struct {
+	Input  string `json:"input"`
+	Output string `json:"output"`
+}
 
 // TestCase represents the input and output test cases.
-type TestCase struct {
-	Input  []interface{} `json:"input"`
-	Output []interface{} `json:"output"`
-}
-
-// Problem represents a problem in the MongoDB document.
 type CodeQue struct {
 	ID          primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+	Title       string             `json:"title" bson:"title"`
 	Difficulty  string             `json:"difficulty" bson:"difficulty"`
+	Category    string             `json:"category" bson:"category"`
 	Description string             `json:"description" bson:"description"`
 	Submissions Submission         `json:"submissions" bson:"submissions"`
-	Templates   Languages          `json:"templates" bson:"templates"`
+	TemplateID  primitive.ObjectID `json:"templateId" bson:"templateId"`
 	TestCases   []TestCase         `json:"testCases" bson:"testCases"`
 }
+
+// model CodeQue {
+// 	id              String            @id @default(auto()) @map("_id") @db.ObjectId
+// 	title           String
+// 	difficulty      String
+// 	category        String
+// 	description     String
+// 	submissions     Submission
+// 	templates       Languages         @relation(fields: [templateId], references: [id])
+// 	templateId      String            @unique @db.ObjectId
+// 	testCases       TestCase[]
+// 	Codesubmissions Codesubmissions[]
+
+// 	@@map("CodeQues")
+//   }

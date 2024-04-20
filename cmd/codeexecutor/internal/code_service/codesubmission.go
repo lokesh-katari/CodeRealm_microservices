@@ -4,15 +4,12 @@ import (
 	// "context"
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"lokesh-katari/code-realm/cmd/codeexecutor/internal/helpers"
 	"os"
-	"strings"
 
-	// "github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
@@ -116,23 +113,45 @@ func CodeSubmission(resCode string, lang string) (string, error) {
 	// Convert the buffer content to a string
 	output := buf.String()
 
-	var status bool
-	if strings.Contains(output, `"status": "true"`) {
-		status = true
-	} else if strings.Contains(output, `"status": "false"`) {
-		status = false
-	}
-	// Create a map to hold the JSON response
-	jsonResponse := map[string]interface{}{
-		"output": output,
-		"error":  "",
-		"lang":   code.Language,
-		"status": status,
-	}
-	jsonResponseBytes, err := json.Marshal(jsonResponse)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(string(jsonResponseBytes))
-	return string(jsonResponseBytes), nil
+	// // Extract the runtime and status from the output
+	// runtimeRegex := regexp.MustCompile(`Runtime: (\d+\.\d+) seconds`)
+	// statusRegex := regexp.MustCompile(`All Test Cases Passed: (True|False|true|false)`)
+
+	// var runtime float64
+	// var status bool
+	// var passedTestCases []int
+
+	// if match := runtimeRegex.FindStringSubmatch(output); len(match) > 1 {
+	// 	runtime, _ = strconv.ParseFloat(match[1], 64)
+	// } else {
+	// 	runtime = 0.0
+	// }
+
+	// if match := statusRegex.FindStringSubmatch(output); len(match) > 1 {
+	// 	status = (match[1] == "True" || match[1] == "true")
+	// }
+
+	// // Extract the test cases that passed
+	// testCaseRegex := regexp.MustCompile(`Test Case (\d+): .*Status: Accepted`)
+	// matches := testCaseRegex.FindAllStringSubmatch(output, -1)
+	// for _, match := range matches {
+	// 	testCaseNumber, _ := strconv.Atoi(match[1])
+	// 	passedTestCases = append(passedTestCases, testCaseNumber)
+	// }
+
+	// // Create a map to hold the JSON response
+	// jsonResponse := map[string]interface{}{
+	// 	"output":          output,
+	// 	"runtime":         runtime,
+	// 	"lang":            code.Language,
+	// 	"status":          status,
+	// 	"passedTestCases": passedTestCases,
+	// }
+
+	// jsonResponseBytes, err := json.Marshal(jsonResponse)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// return string(jsonResponseBytes), nil
+	return output, nil
 }
