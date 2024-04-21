@@ -31,6 +31,7 @@ type CodeExecutionRequest struct {
 	ReqType  string `json:"reqType"`
 	QueID    string `json:"queId"`
 	Email    string `json:"email"`
+	Title    string `json:"title"`
 }
 
 type CodeExecutionResponse struct {
@@ -43,7 +44,7 @@ func main() {
 	err := godotenv.Load()
 	if err != nil {
 		// Handle error loading .env file
-		panic(err)
+		log.Println("Error loading .env file")
 	}
 
 	conn, err := grpc.Dial(os.Getenv("GRPC_URI_CODE_CLIENT"), grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -109,13 +110,17 @@ func executeAndStore(rclient *redis.Client, conn *grpc.ClientConn, req CodeExecu
 	client := codeExecutionpb.NewCodeExecutionServiceClient(conn)
 
 	var Template models.Templates
+	fmt.Println("Request type", req.ReqType, req.QueID, "this is queId")
+	problemId, _ := primitive.ObjectIDFromHex(req.QueID)
 
 	var CodeQue models.CodeQue
-	err := db.CodeQueCollection.FindOne(context.TODO(), bson.M{"_id": req.QueID}).Decode(&CodeQue)
+	err := db.CodeQueCollection.FindOne(context.TODO(), bson.M{"_id": problemId}).Decode(&CodeQue)
 	if err != nil {
 		log.Printf("Error finding problem in MongoDB: %v", err)
 		return
 	}
+
+	// templateId ,_ := primitive.ObjectIDFromHex(CodeQue.TemplateID)
 	// Declare the variable "problem"
 	if req.ReqType == "submit" || req.ReqType == "run" {
 
@@ -127,6 +132,7 @@ func executeAndStore(rclient *redis.Client, conn *grpc.ClientConn, req CodeExecu
 
 		req.Code, err = GenerateCode(req.Language, req.Code, Template, req.ReqType)
 	}
+	fmt.Print
 	res, err := client.ExecuteCode(context.Background(), &codeExecutionpb.ExecuteCodeRequest{
 		Language: req.Language,
 		Code:     req.Code,
@@ -177,6 +183,8 @@ func InsertSubmissionsAndUpdateCodeQue(queId string, output string, req CodeExec
 		return err
 	}
 	_, err = db.SubmissionCollection.InsertOne(context.TODO(), models.CodeSubmission{
+		Title:       req.Title,
+		Accepted:    status,
 		PID:         req.PID,
 		QueID:       queID,
 		Email:       req.Email,

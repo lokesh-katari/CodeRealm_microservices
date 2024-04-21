@@ -41,7 +41,7 @@ services:
       - kafka-network
     restart: unless-stopped
     environment:
-      - KAFKA_BROKER=kafka-network:9092
+      - KAFKA_BROKER=kafka:9092
       - GRPC_URI_CODE_CLIENT=kafka-network:50052
       - REDIS_URI=redis://default:vjIGMyBfPrVKyR1l7F12Gf0SxvHofMmq@redis-10614.c13.us-east-1-3.ec2.cloud.redislabs.com:10614
       - MONGO_URI=mongodb+srv://lokesh:21341A0571@cluster0.yh7v13e.mongodb.net/coderealm_ms?retryWrites=true&w=majority&appName=Cluster0
@@ -51,14 +51,33 @@ services:
     container_name: frontend
     ports:
       - "3000:3000"
-      
+
     networks:
       - kafka-network
     restart: unless-stopped
     environment:
       - DATABASE_URL=mongodb+srv://lokesh:21341A0571@cluster0.yh7v13e.mongodb.net/coderealm_ms?retryWrites=true&w=majority&appName=Cluster0
       - REDIS_URL=redis://default:vjIGMyBfPrVKyR1l7F12Gf0SxvHofMmq@redis-10614.c13.us-east-1-3.ec2.cloud.redislabs.com:10614
-      - KAFKA_BROKER=kafka-network:9092
+      - KAFKA_BROKER=kafka:9092
+      - AUTH_SERVICE_URL=kafka-network:8000
+  auth:
+    image: lokeshkatari/coderealm-auth
+    container_name: authgrpc
+    ports:
+      - "50051:50051"
+    networks:
+      - kafka-network
+    restart: unless-stopped
+  auth_envoy:
+    image: lokeshkatari/coderealm-auth-envoy
+    container_name: authenvoy
+    ports:
+      - 8000:8000
+    networks:
+      - kafka-network
+    restart: unless-stopped
+
+    
 networks:
   kafka-network:
     external: true
