@@ -106,7 +106,7 @@ func processMessages(reader *kafka.Reader, ch chan<- CodeExecutionRequest) {
 	}
 }
 
-func executeAndStore(rclient *redis.Client, conn *grpc.ClientConn, req CodeExecutionRequest) {
+func executeAndStore(rclient *redis.Client, conn *grpc.ClientConn, req CodeExecutionRequest) error {
 	client := codeExecutionpb.NewCodeExecutionServiceClient(conn)
 
 	var Template models.Templates
@@ -117,7 +117,7 @@ func executeAndStore(rclient *redis.Client, conn *grpc.ClientConn, req CodeExecu
 	err := db.CodeQueCollection.FindOne(context.TODO(), bson.M{"_id": problemId}).Decode(&CodeQue)
 	if err != nil {
 		log.Printf("Error finding problem in MongoDB: %v", err)
-		return
+		return err
 	}
 
 	// templateId ,_ := primitive.ObjectIDFromHex(CodeQue.TemplateID)
@@ -127,19 +127,19 @@ func executeAndStore(rclient *redis.Client, conn *grpc.ClientConn, req CodeExecu
 		err := db.TemplateCollection.FindOne(context.TODO(), bson.M{"_id": CodeQue.TemplateID}).Decode(&Template)
 		if err != nil {
 			log.Printf("Error finding template in MongoDB: %v", err)
-			return
+			return err
 		}
-
+		fmt.Println("Template", Template)
 		req.Code, err = GenerateCode(req.Language, req.Code, Template, req.ReqType)
 	}
-	fmt.Print
+	fmt.Println("Generated code", req.Code)
 	res, err := client.ExecuteCode(context.Background(), &codeExecutionpb.ExecuteCodeRequest{
 		Language: req.Language,
 		Code:     req.Code,
 	})
 	if err != nil {
 		log.Printf("Error when calling ExecuteCode: %v", err)
-		return
+		return err
 	}
 	if req.ReqType == "submit" || req.ReqType == "run" {
 		// Extract the runtime and status from the output
@@ -154,11 +154,23 @@ func executeAndStore(rclient *redis.Client, conn *grpc.ClientConn, req CodeExecu
 			// Handle error
 			log.Printf("Error unmarshaling JSON: %v", err)
 		}
+		fmt.Println("Data", data, "this is from the submit code client")
+		// passedCases, ok := data["passedTestCases"]
+		passedTestCasesInterface := data["passedTestCases"].([]interface{})
 
-		status := data["status"].(bool)
+		// Convert each element to int
+		var passedTestCases []int
+		for _, v := range passedTestCasesInterface {
+			passedTestCases = append(passedTestCases, int(v.(float64)))
+		}
+
 		if req.ReqType == "submit" {
-			err = InsertSubmissionsAndUpdateCodeQue(req.QueID, res.Output, req, status, data["runtime"].(string), data["passedTestCases"].(string))
-			return // Do not store output in Redis
+			fmt.Println("inside the sunit client", passedTestCases)
+			err = InsertSubmissionsAndUpdateCodeQue(req.QueID, res.Output, req, true, data["runtime"].(string), passedTestCases)
+			if err != nil {
+				log.Printf("Error inserting submission: %v", err)
+			}
+			return nil
 
 		}
 
@@ -166,7 +178,7 @@ func executeAndStore(rclient *redis.Client, conn *grpc.ClientConn, req CodeExecu
 		if err != nil {
 			log.Printf("Error storing output in Redis: %v", err)
 		}
-		return
+		return nil
 
 	}
 	err = rclient.Set(context.Background(), req.PID, res.Output, 3*time.Minute).Err()
@@ -175,9 +187,12 @@ func executeAndStore(rclient *redis.Client, conn *grpc.ClientConn, req CodeExecu
 	if err != nil {
 		log.Printf("Error storing output in Redis: %v", err)
 	}
+	return nil
 }
 
-func InsertSubmissionsAndUpdateCodeQue(queId string, output string, req CodeExecutionRequest, status bool, runtime string, testcases string) error {
+func InsertSubmissionsAndUpdateCodeQue(queId string, output string, req CodeExecutionRequest, status bool, runtime string, testcases []int) error {
+	fmt.Println("Inserting submission", queId, output, req, status, runtime, testcases, "this is from the insert submission")
+	fmt.Printf("%T,%T,%T,%T,%T,%T", queId, output, req, status, runtime, testcases)
 	queID, err := primitive.ObjectIDFromHex(queId)
 	if err != nil {
 		return err
@@ -226,42 +241,46 @@ func UpdateCodeQue(queID primitive.ObjectID, status bool) error {
 
 func GenerateCode(language string, userCode string, template models.Templates, reqType string) (string, error) {
 	var finalCode string
+	fmt.Println("Generating code")
+	// fmt.Println(template)
 
 	if reqType == "submit" {
 		switch language {
-		case "Python":
-			finalCode = userCode + template.Python.HiddenTestCode
-		case "JavaScript":
+		case "python":
+			finalCode = userCode + "\n" + template.Python.HiddenTestCode
+		case "javaScript":
 			finalCode = userCode + template.JavaScript.HiddenTestCode
-		case "Golang":
+		case "golang":
 			finalCode = userCode + template.Golang.HiddenTestCode
-		case "Java":
+		case "java":
 			finalCode = userCode + template.Java.HiddenTestCode
-		case "C":
+		case "c":
 			finalCode = userCode + template.C.HiddenTestCode
-		case "Cpp":
+		case "cpp":
 			finalCode = userCode + template.Cpp.HiddenTestCode
 		default:
 			return "", fmt.Errorf("Invalid language: %s", language)
 		}
 	} else {
 		switch language {
-		case "Python":
-			finalCode = userCode + template.Python.RunTestCode
-		case "JavaScript":
+		case "python":
+			finalCode = userCode + "\n" + template.Python.RunTestCode
+		case "javaScript":
 			finalCode = userCode + template.JavaScript.RunTestCode
-		case "Golang":
+		case "golang":
 			finalCode = userCode + template.Golang.RunTestCode
-		case "Java":
+		case "java":
 			finalCode = userCode + template.Java.RunTestCode
-		case "C":
+		case "c":
 			finalCode = userCode + template.C.RunTestCode
-		case "Cpp":
+		case "cpp":
 			finalCode = userCode + template.Cpp.RunTestCode
 		default:
 			return "", fmt.Errorf("Invalid language: %s", language)
 		}
 	}
+	// finalCode = userCode + template.Python.RunTestCode
+	fmt.Println("Generated code adsf", finalCode, reqType, "thisis requestype")
 	return finalCode, nil
 }
 
@@ -283,13 +302,6 @@ func Seperateoutput(output string, language string) (string, error) {
 		status = (match[1] == "True" || match[1] == "true")
 	}
 
-	// Extract the test cases that passed
-	// testCaseRegex := regexp.MustCompile(`Test Case (\d+): .*Status: Accepted`)
-	// matches := testCaseRegex.FindAllStringSubmatch(output, -1)
-	// for _, match := range matches {
-	// 	testCaseNumber, _ := strconv.Atoi(match[1])
-	// 	passedTestCases = append(passedTestCases, testCaseNumber)
-	// }
 	pattern := `Passed Test Cases:\s*\[([^]]+)\]`
 
 	// Compile the regex pattern
@@ -317,11 +329,12 @@ func Seperateoutput(output string, language string) (string, error) {
 	} else {
 		fmt.Println("Passed Test Cases not found in the output string.")
 	}
+	stringRuntime := strconv.FormatFloat(runtime, 'f', -1, 64)
 
 	// Create a map to hold the JSON response
 	jsonResponse := map[string]interface{}{
 		"output":          output,
-		"runtime":         runtime,
+		"runtime":         stringRuntime,
 		"language":        language,
 		"status":          status,
 		"passedTestCases": passedTestCasesInt,

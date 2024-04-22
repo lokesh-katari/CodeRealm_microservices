@@ -15,7 +15,7 @@ type CodeSubmission struct {
 	Email       string             `json:"email"`
 	Code        string             `json:"code"`
 	Language    string             `json:"language"`
-	Testcases   string             `json:"testcases"`
+	Testcases   []int              `json:"testcases"`
 	Runtime     string             `json:"runtime"`
 	SubmittedAT time.Time          `json:"submittedAt"`
 	Output      string             `json:"output"`

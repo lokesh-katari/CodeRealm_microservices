@@ -42,7 +42,7 @@ services:
     restart: unless-stopped
     environment:
       - KAFKA_BROKER=kafka:9092
-      - GRPC_URI_CODE_CLIENT=kafka-network:50052
+      - GRPC_URI_CODE_CLIENT=code_exec:50052
       - REDIS_URI=redis://default:vjIGMyBfPrVKyR1l7F12Gf0SxvHofMmq@redis-10614.c13.us-east-1-3.ec2.cloud.redislabs.com:10614
       - MONGO_URI=mongodb+srv://lokesh:21341A0571@cluster0.yh7v13e.mongodb.net/coderealm_ms?retryWrites=true&w=majority&appName=Cluster0
 
