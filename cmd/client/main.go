@@ -156,7 +156,7 @@ func executeAndStore(rclient *redis.Client, conn *grpc.ClientConn, req CodeExecu
 		}
 		fmt.Println("Data", data, "this is from the submit code client")
 		// passedCases, ok := data["passedTestCases"]
-		passedTestCasesInterface := data["passedTestCases"].([]interface{})
+		passedTestCasesInterface := data["testcases"].([]interface{})
 
 		// Convert each element to int
 		var passedTestCases []int
@@ -333,11 +333,11 @@ func Seperateoutput(output string, language string) (string, error) {
 
 	// Create a map to hold the JSON response
 	jsonResponse := map[string]interface{}{
-		"output":          output,
-		"runtime":         stringRuntime,
-		"language":        language,
-		"status":          status,
-		"passedTestCases": passedTestCasesInt,
+		"output":    output,
+		"runtime":   stringRuntime,
+		"language":  language,
+		"status":    status,
+		"testcases": passedTestCasesInt,
 	}
 
 	jsonResponseBytes, err := json.Marshal(jsonResponse)
