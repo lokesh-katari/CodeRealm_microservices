@@ -10,7 +10,17 @@ service AuthService {
   rpc LogoutUser(LogoutUserRequest) returns (LogoutUserResponse) {}
   rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
   rpc UpdateUserSubmissions(UpdateUserSubmissionsRequest) returns (UpdateUserSubmissionsResponse){}
+  rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse) {}
+}
 
+message ChangePasswordRequest {
+  string token = 1;
+  string oldPassword = 2;
+  string newPassword = 3;
+}
+
+message ChangePasswordResponse {
+  bool success = 1;
 }
 
 message GetUserRequest {

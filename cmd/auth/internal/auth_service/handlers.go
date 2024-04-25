@@ -40,7 +40,7 @@ func (s *Server) RegisterUser(ctx context.Context, req *pb.RegisterUserRequest) 
 			Email: user.Email,
 			Name:  user.Name,
 		},
-	}, nil
+	}, status.Error(codes.OK, "User registered successfully")
 
 }
 func (s *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (*pb.LoginUserResponse, error) {
@@ -52,7 +52,7 @@ func (s *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (*pb.L
 	}
 	return &pb.LoginUserResponse{
 		Token: token,
-	}, nil
+	}, status.Error(codes.OK, "User logged in successfully")
 }
 
 func (s *Server) LogoutUser(ctx context.Context, req *pb.LogoutUserRequest) (*pb.LogoutUserResponse, error) {
@@ -65,7 +65,7 @@ func (s *Server) LogoutUser(ctx context.Context, req *pb.LogoutUserRequest) (*pb
 	}
 	return &pb.LogoutUserResponse{
 		Success: true,
-	}, nil
+	}, status.Error(codes.OK, "User logged out successfully")
 
 }
 
@@ -85,7 +85,7 @@ func (s *Server) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.GetUs
 			Hard_ProblemCount:   int32(user.Hard_Problem_count),
 			SolvedProblems:      user.Submission,
 		},
-	}, nil
+	}, status.Error(codes.OK, "User fetched successfully")
 }
 
 func (s *Server) UpdateUserSubmissions(ctx context.Context, req *pb.UpdateUserSubmissionsRequest) (*pb.UpdateUserSubmissionsResponse, error) {
@@ -104,5 +104,19 @@ func (s *Server) UpdateUserSubmissions(ctx context.Context, req *pb.UpdateUserSu
 			Hard_ProblemCount:   int32(user.Hard_Problem_count),
 			SolvedProblems:      user.Submission,
 		},
-	}, nil
+	}, status.Errorf(codes.OK, "User updated successfully")
+}
+
+func (s *Server) ChangePassword(ctx context.Context, req *pb.ChangePasswordRequest) (*pb.ChangePasswordResponse, error) {
+
+	err := s.authservice.ChangePassword(ctx, req.Token, req.OldPassword, req.NewPassword)
+	if err != nil {
+		return &pb.ChangePasswordResponse{
+			Success: false,
+		}, status.Errorf(codes.Internal, "Error getting user: %v", err)
+	}
+
+	return &pb.ChangePasswordResponse{
+		Success: true,
+	}, status.Errorf(codes.OK, "Password changed successfully")
 }

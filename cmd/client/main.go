@@ -249,7 +249,7 @@ func GenerateCode(language string, userCode string, template models.Templates, r
 		case "python":
 			finalCode = userCode + "\n" + template.Python.HiddenTestCode
 		case "javaScript":
-			finalCode = userCode + template.JavaScript.HiddenTestCode
+			finalCode = userCode + "\n" + template.JavaScript.HiddenTestCode
 		case "golang":
 			finalCode = userCode + template.Golang.HiddenTestCode
 		case "java":
@@ -266,7 +266,7 @@ func GenerateCode(language string, userCode string, template models.Templates, r
 		case "python":
 			finalCode = userCode + "\n" + template.Python.RunTestCode
 		case "javaScript":
-			finalCode = userCode + template.JavaScript.RunTestCode
+			finalCode = userCode + "\n" + template.JavaScript.RunTestCode
 		case "golang":
 			finalCode = userCode + template.Golang.RunTestCode
 		case "java":

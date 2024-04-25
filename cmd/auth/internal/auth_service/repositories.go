@@ -131,9 +131,9 @@ func (r *PostgresUserRepository) GetUserByEmail(email string) (*User, error) {
 }
 
 func (r *PostgresUserRepository) UpdateUser(user *User) error {
-	query := "UPDATE users SET email = $1, password = $2, name = $3, easy_problem_count = $4, medium_problem_count = $5, hard_problem_count = $6, submissions = $7 WHERE id = $8"
+	query := "UPDATE users SET email = $1, password = $2, name = $3 WHERE id = $4"
 	// submission := strings.Join(user.Submission, ",")
-	_, err := r.db.Exec(query, user.Email, user.Password, user.Name, user.Easy_Problem_count, user.Medium_Problem_count, user.Hard_Problem_count, user.ID)
+	_, err := r.db.Exec(query, user.Email, user.Password, user.Name, user.ID)
 	if err != nil {
 		return err
 	}

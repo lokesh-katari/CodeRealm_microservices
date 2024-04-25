@@ -14,6 +14,7 @@ type AuthService interface {
 	LogoutUser(ctx context.Context, token string) error
 	GetUser(ctx context.Context, token string) (*User, error)
 	UpdateUserSubmissions(ctx context.Context, token string, queId string, difficulty string) (*User, error)
+	ChangePassword(ctx context.Context, token string, oldPassword string, newPassword string) error
 }
 
 type AuthServiceImpl struct {
@@ -132,4 +133,34 @@ func (s *AuthServiceImpl) UpdateUserSubmissions(ctx context.Context, token strin
 	}
 
 	return user, nil
+}
+
+func (s *AuthServiceImpl) ChangePassword(ctx context.Context, token string, oldPassword string, newPassword string) error {
+
+	claims, err := s.jwtManager.VerifyJWT(token)
+
+	if err != nil {
+		return err
+	}
+
+	userEmail, ok := claims["email"].(string)
+	if !ok {
+		return errors.New("invalid user ID")
+	}
+
+	user, err := s.userRepo.GetUserByEmail(userEmail)
+	if err != nil {
+		return err
+	}
+	if user.ComparePassword(oldPassword) {
+		user.Password = newPassword
+		err = s.userRepo.UpdateUser(user)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	return errors.New("invalid password")
+
 }
