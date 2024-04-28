@@ -38,10 +38,13 @@ func CodeSubmission(resCode string, lang string) (string, error) {
 
 	switch code.Language {
 	case "javascript":
+		fmt.Println("inside the js code")
+
 		tmpfile, err := ioutil.TempFile("", "example*.js")
 		if err != nil {
 			log.Fatal(err)
 		}
+		fmt.Println("tmpfile created successfully", tmpfile.Name(), "this is tmpfile name", code.Code, "this is code ")
 		fmt.Fprintf(tmpfile, code.Code)
 		tmpfilePath = tmpfile.Name()
 		resp, err = helpers.RunJs(ctx, cli, tmpfilePath)
@@ -71,12 +74,104 @@ func CodeSubmission(resCode string, lang string) (string, error) {
 		if err != nil {
 			panic(err)
 		}
+	case "csharp":
+		tmpfile, err := ioutil.TempFile("", "example*.cs")
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Fprintf(tmpfile, code.Code)
+		tmpfilePath = tmpfile.Name()
+		resp, err = helpers.RunCsharp(ctx, cli, tmpfilePath)
+		if err != nil {
+			panic(err)
+		}
+	case "cpp":
+		tmpfile, err := ioutil.TempFile("", "example*.cpp")
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Fprintf(tmpfile, code.Code)
+		tmpfilePath = tmpfile.Name()
+		resp, err = helpers.RunCpp(ctx, cli, tmpfilePath)
+		if err != nil {
+			panic(err)
+		}
+	case "golang":
+		tmpfile, err := ioutil.TempFile("", "example*.go")
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Fprintf(tmpfile, code.Code)
+		tmpfilePath = tmpfile.Name()
+		resp, err = helpers.RunGo(ctx, cli, tmpfilePath)
+		if err != nil {
+			panic(err)
+		}
+	case "ruby":
+		tmpfile, err := ioutil.TempFile("", "example*.rb")
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Fprintf(tmpfile, code.Code)
+		tmpfilePath = tmpfile.Name()
+		resp, err = helpers.RunRuby(ctx, cli, tmpfilePath)
+		if err != nil {
+			panic(err)
+		}
+	case "swift":
+		tmpfile, err := ioutil.TempFile("", "example*.swift")
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Fprintf(tmpfile, code.Code)
+		tmpfilePath = tmpfile.Name()
+		resp, err = helpers.RunSwift(ctx, cli, tmpfilePath)
+		if err != nil {
+			panic(err)
+		}
+	case "c":
+		tmpfile, err := ioutil.TempFile("", "example*.c")
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Fprintf(tmpfile, code.Code)
+		tmpfilePath = tmpfile.Name()
+		resp, err = helpers.RunC(ctx, cli, tmpfilePath)
+		if err != nil {
+			panic(err)
+		}
+	case "rust":
+		tmpfile, err := ioutil.TempFile("", "example*.rs")
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Fprintf(tmpfile, code.Code)
+		tmpfilePath = tmpfile.Name()
+		resp, err = helpers.RunRust(ctx, cli, tmpfilePath)
+		if err != nil {
+			panic(err)
+		}
+	case "php":
+		tmpfile, err := ioutil.TempFile("", "example*.php")
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Fprintf(tmpfile, code.Code)
+		tmpfilePath = tmpfile.Name()
+		resp, err = helpers.RunPHP(ctx, cli, tmpfilePath)
+		if err != nil {
+
+			panic(err)
+		}
+
 	}
 
+	fmt.Println(resp, "this is response from the container")
 	// Close the file.
 	tmpfile.Close()
+	fmt.Println(tmpfilePath, "this is tmpfile path")
 	// fmt.Println(resp.ID, "this is response id")
-	defer os.Remove(tmpfilePath)
+	// defer os.Remove(tmpfilePath)
 
 	if err := cli.ContainerStart(ctx, resp.ID, container.StartOptions{}); err != nil {
 		panic(err)
@@ -93,15 +188,15 @@ func CodeSubmission(resCode string, lang string) (string, error) {
 	}
 
 	out, err := cli.ContainerLogs(ctx, resp.ID, container.LogsOptions{ShowStdout: true, ShowStderr: true})
+	fmt.Println("container logs obtained successfully", out)
 	if err != nil {
 		panic(err)
 	}
-
 	var buf bytes.Buffer
 	if _, err := stdcopy.StdCopy(&buf, &buf, out); err != nil {
 		panic(err)
 	}
-	cli.ContainerRemove(ctx, resp.ID, container.RemoveOptions{})
+	// defer cli.ContainerRemove(ctx, resp.ID, container.RemoveOptions{})
 
 	// Convert the buffer content to a string
 	output := buf.String()

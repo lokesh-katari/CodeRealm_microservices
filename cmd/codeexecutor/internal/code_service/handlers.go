@@ -19,6 +19,7 @@ func NewServer() *Server {
 
 func (s *Server) ExecuteCode(ctx context.Context, req *pb.ExecuteCodeRequest) (*pb.ExecuteCodeResponse, error) {
 	// return s.codeservice.ExecuteCode(ctx, req)
+	fmt.Println("Code received to the handler", req.Code)
 	op, err := CodeSubmission(req.Code, req.Language)
 	if err != nil {
 		fmt.Println("Error in code submission", err)

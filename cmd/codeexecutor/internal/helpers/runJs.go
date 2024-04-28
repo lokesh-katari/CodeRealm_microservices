@@ -9,11 +9,11 @@ import (
 
 func RunJs(ctx context.Context, cli *client.Client, tmpfilePath string) (container.CreateResponse, error) {
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
-		Image: "node-env",
+		Image: "lokeshkatari/js-env:latest",
 		Cmd:   []string{"/app/code.js"},
 	}, &container.HostConfig{
-		AutoRemove: true,
-		Binds:      []string{tmpfilePath + ":/app/code.js"},
+
+		Binds: []string{tmpfilePath + ":/app/code.js"},
 	}, nil, nil, "")
 	if err != nil {
 		panic(err)

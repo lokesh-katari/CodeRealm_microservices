@@ -12,6 +12,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -248,7 +249,7 @@ func GenerateCode(language string, userCode string, template models.Templates, r
 		switch language {
 		case "python":
 			finalCode = userCode + "\n" + template.Python.HiddenTestCode
-		case "javaScript":
+		case "javascript":
 			finalCode = userCode + "\n" + template.JavaScript.HiddenTestCode
 		case "golang":
 			finalCode = userCode + template.Golang.HiddenTestCode
@@ -265,7 +266,7 @@ func GenerateCode(language string, userCode string, template models.Templates, r
 		switch language {
 		case "python":
 			finalCode = userCode + "\n" + template.Python.RunTestCode
-		case "javaScript":
+		case "javascript":
 			finalCode = userCode + "\n" + template.JavaScript.RunTestCode
 		case "golang":
 			finalCode = userCode + template.Golang.RunTestCode
@@ -317,7 +318,8 @@ func Seperateoutput(output string, language string) (string, error) {
 		// Split the string into individual test case values
 		passedTestCases := regexp.MustCompile(`\s*,\s*`).Split(passedTestCasesStr, -1)
 		for _, testCase := range passedTestCases {
-			tc, err := strconv.Atoi(testCase)
+			trimmedValue := strings.TrimSpace(testCase)
+			tc, err := strconv.Atoi(trimmedValue)
 			if err != nil {
 				fmt.Println("Error converting test case value to integer:", err)
 				return "", err
