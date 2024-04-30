@@ -1,4 +1,4 @@
-FROM ruby:alpine
+FROM ruby:3.3-slim
 
 # Set the working directory within the container
 WORKDIR /app

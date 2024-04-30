@@ -1,4 +1,4 @@
-FROM rust:alpine
+FROM rust:1-slim
 
 # Set the working directory within the container
 WORKDIR /app

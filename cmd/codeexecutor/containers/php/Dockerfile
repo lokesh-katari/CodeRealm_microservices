@@ -1,4 +1,4 @@
-FROM php:alpine
+FROM frolvlad/alpine-php
 
 # Set the working directory within the container
 WORKDIR /app

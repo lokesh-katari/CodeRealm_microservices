@@ -1,4 +1,4 @@
-FROM gcc:alpine
+FROM frolvlad/alpine-gcc
 # Set the working directory within the container
 WORKDIR /app
 

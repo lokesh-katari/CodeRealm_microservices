@@ -1,5 +1,5 @@
 # Use Python Alpine as the base image
-FROM node:alpine
+FROM perl:5-slim
 
 # Set the working directory within the container
 WORKDIR /app

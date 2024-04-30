@@ -1,4 +1,4 @@
-FROM swift:alpine
+FROM swift:5.10-slim
 
 # Set the working directory within the container
 WORKDIR /app
