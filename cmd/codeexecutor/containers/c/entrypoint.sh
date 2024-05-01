@@ -12,10 +12,10 @@ if [ ! -f "$1" ]; then
     exit 1
 fi
 
-if [ "${1##*.}" != "c" ]; then
+if [ "${1##*.}" != "c" || "${1##*.}" !="cpp" ]; then
     echo "Error: '$1' is not a valid C source file."
     exit 1
 fi
 
-# Compile and execute the C code file
-gcc -o "${1%.*}" "$1" && "./${1%.*}"
+gcc -o "${1%.*}" "$1" && "${1%.*}"
+

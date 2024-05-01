@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/runtime:3.1-alpine
+FROM  mono:latest
 
 # Set the working directory within the container
 WORKDIR /app

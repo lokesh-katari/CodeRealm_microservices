@@ -111,21 +111,21 @@ func executeAndStore(rclient *redis.Client, conn *grpc.ClientConn, req CodeExecu
 	client := codeExecutionpb.NewCodeExecutionServiceClient(conn)
 
 	var Template models.Templates
-	fmt.Println("Request type", req.ReqType, req.QueID, "this is queId")
-	problemId, _ := primitive.ObjectIDFromHex(req.QueID)
-
-	var CodeQue models.CodeQue
-	err := db.CodeQueCollection.FindOne(context.TODO(), bson.M{"_id": problemId}).Decode(&CodeQue)
-	if err != nil {
-		log.Printf("Error finding problem in MongoDB: %v", err)
-		return err
-	}
-
-	// templateId ,_ := primitive.ObjectIDFromHex(CodeQue.TemplateID)
-	// Declare the variable "problem"
 	if req.ReqType == "submit" || req.ReqType == "run" {
+		fmt.Println("Request type", req.ReqType, req.QueID, "this is queId")
 
-		err := db.TemplateCollection.FindOne(context.TODO(), bson.M{"_id": CodeQue.TemplateID}).Decode(&Template)
+		// templateId ,_ := primitive.ObjectIDFromHex(CodeQue.TemplateID)
+		// Declare the variable "problem"
+		problemId, _ := primitive.ObjectIDFromHex(req.QueID)
+
+		var CodeQue models.CodeQue
+
+		err := db.CodeQueCollection.FindOne(context.TODO(), bson.M{"_id": problemId}).Decode(&CodeQue)
+		if err != nil {
+			log.Printf("Error finding problem in MongoDB: %v", err)
+			return err
+		}
+		err = db.TemplateCollection.FindOne(context.TODO(), bson.M{"_id": CodeQue.TemplateID}).Decode(&Template)
 		if err != nil {
 			log.Printf("Error finding template in MongoDB: %v", err)
 			return err

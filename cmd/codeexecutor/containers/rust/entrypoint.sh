@@ -18,4 +18,5 @@ if [ "${1##*.}" != "rs" ]; then
 fi
 
 # Compile and execute the Rust code file
-rustc "$1" && "./${1%.*}"
+rustc "$1" && "${1%.*}"
+

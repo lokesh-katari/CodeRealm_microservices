@@ -17,5 +17,11 @@ if [ "${1##*.}" != "go" ]; then
     exit 1
 fi
 
+echo "Running Go code file: $1"
+
+ls -l 
+
+go version
+
 # Execute the Go code file
 go run "$1"
