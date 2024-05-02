@@ -1,12 +1,17 @@
-# <h1 style="font-family: 'Arial'; color: #A5F3FC; text-align:center;  font-size: 60px" ><span style="color:#A5F3FC">Code<span style="color:rgb(236 254 255)">Realm</span>.</span></h1>
+<div align="center">
+  <img src="https://github.com/lokesh-katari/CodeRealm_microservices/assets/111894942/ec05afd6-43b1-49c0-bb6c-ffb2e7e53d8c" alt="code" />
+</div>
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 CodeRealm is a platform for coding evaluation and question evaluation that supports multiple programming languages. It enables users to compile and evaluate code snippets in languages such as Java, C++, Python, JavaScript, and Golang. The application was originally built as a monolithic MERN stack application, but has been migrated to microservices architecture with Golang as the backend and Next.js as the frontend.
 
+## Architecture
+![code final asdf](https://github.com/lokesh-katari/CodeRealm_microservices/assets/111894942/793cb4f8-2f63-4219-a285-e4113e4af6a3)
+
 ## Features
 
-- **Support for Multiple Languages**: CodeRealm supports 10+ programming languages for code compilation and evaluation.
+- **Support for Multiple Languages**: CodeRealm supports 10+ programming languages for code compilation .
 - **Microservices Architecture**: The application is built using microservices architecture, allowing for scalability and maintainability.
 - **Queueing with Kafka**: Code submissions are queued using Kafka for efficient processing.
 - **Database Integration**: PostgreSQL is used as the user database, while Redis is used for handling run requests.
@@ -18,6 +23,7 @@ CodeRealm is a platform for coding evaluation and question evaluation that suppo
 
 - Docker and Docker Compose for local development.
 - Kubernetes cluster for production deployment.
+
 
 ### Local Development
 
@@ -58,3 +64,4 @@ Contributions are welcome! Please feel free to fork the repository and submit pu
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+
