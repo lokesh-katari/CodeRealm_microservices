@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coderealm-auth
+  namespace: coderealm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: coderealm-auth
+  template:
+    metadata:
+      labels:
+        app: coderealm-auth
+    spec: 
+      containers:
+      - name: coderealm-auth
+        image: lokeshkatari/coderealm-auth:latest
+        ports:
+        - containerPort: 50051
+        resources:
+          limits:
+            cpu: "1"
+            memory: "512Mi"
+          requests:
+            cpu: "0.5"
+            memory: "256Mi"

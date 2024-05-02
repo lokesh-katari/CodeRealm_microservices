@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: code-frontend
-        image: lokeshkatari/coderealm-frontend
+        image: lokeshkatari/coderealm-frontend:latest
         env:
         - name: KAFKA_BOOTSTRAP_SERVERS
           value: my-cluster-kafka-bootstrap:9092
@@ -30,6 +30,15 @@ spec:
           requests:
             cpu: "0.5"
             memory: "256Mi"
-
-
+      - name: auth-envoy
+        image : lokeshkatari/coderealm-auth-envoy-grpc:latest
+        ports:
+        - containerPort: 8000
+        resources:
+          limits:
+            cpu: "1"
+            memory: "512Mi"
+          requests:
+            cpu: "0.5"
+            memory: "256Mi"
 

@@ -77,6 +77,8 @@ static_resources:
                   address:
                     socket_address:
                       address: authgrpc
+                      # address: coderealm-auth-service.coderealm.svc.cluster.local  
+                      # or specify the IP address of the service or the docker contianer incase of the local development
                       port_value: 50051
       http2_protocol_options: {} # Force HTTP/2
       # Your grpc server communicates over TLS. You must configure the transport

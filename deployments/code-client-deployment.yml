@@ -19,8 +19,10 @@ spec:
         env:
         - name: KAFKA_BOOTSTRAP_SERVERS
           value: my-cluster-kafka-bootstrap:9092
-        - name: GRPC_SERVER
-          value: "code-exec-service.coderealm.svc.cluster.local"    
+        - name: GRPC_URI_CODE_CLIENT
+          value: "code-exec-service.coderealm:50052"  
+        - name : REDIS_URI
+          value: "redis://default:vjIGMyBfPrVKyR1l7F12Gf0SxvHofMmq@redis-10614.c13.us-east-1-3.ec2.cloud.redislabs.com:10614"  
         resources:
           limits:
             cpu: "1"

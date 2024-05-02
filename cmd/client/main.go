@@ -49,6 +49,7 @@ func main() {
 	}
 
 	conn, err := grpc.Dial(os.Getenv("GRPC_URI_CODE_CLIENT"), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	fmt.Println("Connected to gRPC", conn, "this is connection", os.Getenv("GRPC_URI_CODE_CLIENT"))
 	defer db.Client.Disconnect(context.TODO())
 	opt, err := redis.ParseURL(os.Getenv("REDIS_URI"))
 	if err != nil {
@@ -59,13 +60,14 @@ func main() {
 	pong, err := rclient.Ping(context.Background()).Result()
 	fmt.Println(pong, err)
 	submissionreader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers: []string{os.Getenv("KAFKA_BROKER")},
+		Brokers: []string{os.Getenv("KAFKA_BOOTSTRAP_SERVERS")},
 		Topic:   "code-submission-request",
 		GroupID: "submission-group",
 	})
+	fmt.Println("Connected to Kafka")
 
 	runreader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers: []string{os.Getenv("KAFKA_BROKER")},
+		Brokers: []string{os.Getenv("KAFKA_BOOTSTRAP_SERVERS")},
 		Topic:   "code-run-request",
 		GroupID: "run-group",
 	})
@@ -89,6 +91,7 @@ func main() {
 	defer rclient.Close()
 }
 func processMessages(reader *kafka.Reader, ch chan<- CodeExecutionRequest) {
+	fmt.Println("Processing messages")
 	for {
 		msg, err := reader.ReadMessage(context.Background())
 		if err != nil {
@@ -109,6 +112,7 @@ func processMessages(reader *kafka.Reader, ch chan<- CodeExecutionRequest) {
 
 func executeAndStore(rclient *redis.Client, conn *grpc.ClientConn, req CodeExecutionRequest) error {
 	client := codeExecutionpb.NewCodeExecutionServiceClient(conn)
+	fmt.Println("Executing code", req, "this is from the execute and store", client, conn)
 
 	var Template models.Templates
 	if req.ReqType == "submit" || req.ReqType == "run" {
@@ -130,14 +134,15 @@ func executeAndStore(rclient *redis.Client, conn *grpc.ClientConn, req CodeExecu
 			log.Printf("Error finding template in MongoDB: %v", err)
 			return err
 		}
-		fmt.Println("Template", Template)
+		// fmt.Println("Template", Template)
 		req.Code, err = GenerateCode(req.Language, req.Code, Template, req.ReqType)
 	}
-	fmt.Println("Generated code", req.Code)
+	fmt.Println("Generated code", req.Code, req.Language)
 	res, err := client.ExecuteCode(context.Background(), &codeExecutionpb.ExecuteCodeRequest{
 		Language: req.Language,
 		Code:     req.Code,
 	})
+	fmt.Println("Executed code", res)
 	if err != nil {
 		log.Printf("Error when calling ExecuteCode: %v", err)
 		return err
