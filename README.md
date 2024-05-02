@@ -4,10 +4,15 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-CodeRealm is a platform for coding evaluation and question evaluation that supports multiple programming languages. It enables users to compile and evaluate code snippets in languages such as Java, C++, Python, JavaScript, and Golang. The application was originally built as a monolithic MERN stack application, but has been migrated to microservices architecture with Golang as the backend and Next.js as the frontend.
+CodeRealm is a platform for coding evaluation and question evaluation that supports multiple programming languages. It enables users to compile and evaluate code snippets in languages such as Java, C++, Python, JavaScript, and Golang, ans also supports 10+ programming languages .It also has the frontend web editor builtin for HTML,CSS and JS . The application was originally built as a monolithic MERN stack application, but has been migrated to microservices architecture with Golang as the backend and Next.js as the frontend.
+## Frontend Repo Link :
+ - [Coderealm frontend](https://github.com/lokesh-katari/coderealm_frontend)
 
 ## Architecture
 ![code final asdf](https://github.com/lokesh-katari/CodeRealm_microservices/assets/111894942/793cb4f8-2f63-4219-a285-e4113e4af6a3)
+
+## Previous repository links for the monolith architecture:
+ - [Code Judge Online](https://github.com/lokesh-katari/Code-judge-Online)
 
 ## Features
 
