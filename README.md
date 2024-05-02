@@ -30,13 +30,13 @@ CodeRealm is a platform for coding evaluation and question evaluation that suppo
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/your-username/CodeRealm.git
+   git clone https://github.com/lokesh-katari/CodeRealm_microservices.git
    ```
 
 2. Navigate to the project directory:
 
    ```bash
-   cd CodeRealm
+   cd CodeRealm_microservices
    ```
 
 3. Start the application using Docker Compose:
@@ -48,14 +48,34 @@ CodeRealm is a platform for coding evaluation and question evaluation that suppo
 4. Access the application at `http://localhost:3000`.
 
 ### Production Deployment
+Before doing the below steps you need to configure the kafka strimzi cluster
+  ```bash
+    helm repo add strimzi https://strimzi.io/charts/
+
+    kubectl create ns coderealm
+    
+    helm install strimzi-operator strimzi/strimzi-kafka-operator -n coderealm
+  ```
+make sure that you specify the namespace before deployment ,here :coderealm
 
 1. Deploy the Kubernetes manifests in the `deployments/` directory:
 
    ```bash
+   kubectl create ns coderealm 
    kubectl apply -f deployments/
    ```
 
 2. Access the application using the provided Ingress configuration.
+3. If you are using minikube cluster then use the command
+  ```bash
+  minikube ip
+  ```
+  for getting the ip from the minikube and you can access tit from the browser
+4. also configure the port for the envoy to expose it to the local system using the command:
+  ```bash
+  kubectl port-forward service/code-frontend-service 8000:8000 -n coderealm
+
+  ```
 
 ## Contributing
 
