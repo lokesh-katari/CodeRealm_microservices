@@ -14,9 +14,25 @@ CodeRealm is a platform for coding evaluation and question evaluation that suppo
 ## Previous repository links for the monolith architecture:
  - [Code Judge Online](https://github.com/lokesh-katari/Code-judge-Online)
 
+## Tech Stack
+
+- **Backend**: GoLang
+- **Communication Protocol**: gRPC ,http
+- **Database ORM**: Prisma (MongoDB)
+- **Caching**: Redis
+- **User Database**: PostgreSQL
+- **Data Storage**: MongoDB
+- **Message Queue**: Kafka
+- **Containerization**: Docker
+- **Web Proxy**: Envoy Proxy
+- **Frontend**: Next.js
+- **Deployment**: Docker Compose, Kubernetes
+
+
 ## Features
 
 - **Support for Multiple Languages**: CodeRealm supports 10+ programming languages for code compilation .
+- **Frontend Web Editor**: CodeRealm includes a built-in web editor for HTML, CSS, and JavaScript, enabling users to write, preview, and evaluate their code directly in the browser.
 - **Microservices Architecture**: The application is built using microservices architecture, allowing for scalability and maintainability.
 - **Queueing with Kafka**: Code submissions are queued using Kafka for efficient processing.
 - **Database Integration**: PostgreSQL is used as the user database, while Redis is used for handling run requests.
