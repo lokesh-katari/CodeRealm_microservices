@@ -8,6 +8,18 @@ CodeRealm is a platform for coding evaluation and question evaluation that suppo
 ## Frontend Repo Link :
  - [Coderealm frontend](https://github.com/lokesh-katari/coderealm_frontend)  -- Next.js app
 
+## Table of Contents
+
+- [Architecture](#rchitecture)
+- [Tech Stack](#tech-stack)
+- [Previous repo Built in MERN](Previous-repository-links-for-the-monolith-architecture)
+- [Features](#features)
+- [Installation and Usage](#installation-and-usage)
+- [Contributing](#contributing)
+- [License](#license)
+- [Demo](#Project-Demo-ideo)
+
+
 ## Architecture
 ![code final asdf](https://github.com/lokesh-katari/CodeRealm_microservices/assets/111894942/793cb4f8-2f63-4219-a285-e4113e4af6a3)
 
