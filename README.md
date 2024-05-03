@@ -12,13 +12,13 @@ CodeRealm is a platform for coding evaluation and question evaluation that suppo
 
 - [Architecture](#architecture)
 - [Tech Stack](#tech-stack)
-- [Previous repo Built in MERN](previous-repository-links-for-the-monolith-architecture)
+- [Previous repo Built in MERN](#previous-repository-links-for-the-monolith-architecture)
 - [Features](#features)
 - [Installation and Usage](#installation-and-usage)
 - [Minikube Deployment Archtecture](#minikube-deployment-archtecture)
 - [Contributing](#contributing)
 - [License](#license)
-- [Demo](#Project-Demo-ideo)
+- [Demo](#demo)
 
 
 ## Architecture
@@ -112,7 +112,7 @@ make sure that you specify the namespace before deployment ,here :coderealm
   kubectl port-forward service/code-frontend-service 8000:8000 -n coderealm
 
   ```
-# Minikube Deployment Archtecture:
+# Minikube Deployment Architecture:
 
 ![coderealm kubernetes](https://github.com/lokesh-katari/CodeRealm_microservices/assets/111894942/6073e1a4-dbb0-452a-bfe6-c0aef4d22708)
 
