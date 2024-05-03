@@ -15,7 +15,7 @@ CodeRealm is a platform for coding evaluation and question evaluation that suppo
 - [Previous repo Built in MERN](#previous-repository-links-for-the-monolith-architecture)
 - [Features](#features)
 - [Installation and Usage](#installation-and-usage)
-- [Minikube Deployment Archtecture](#minikube-deployment-archtecture)
+- [Minikube Deployment Architecture](#minikube-deployment-architecture)
 - [Contributing](#contributing)
 - [License](#license)
 - [Demo](#demo)
@@ -116,9 +116,9 @@ make sure that you specify the namespace before deployment ,here :coderealm
 
 ![coderealm kubernetes](https://github.com/lokesh-katari/CodeRealm_microservices/assets/111894942/6073e1a4-dbb0-452a-bfe6-c0aef4d22708)
 
-## Demo
+# Demo
 
-![Demo](https://github.com/lokesh-katari/coderealm_frontend/assets/111894942/1a4c63b3-a781-445a-87fe-800b90d2e607)
+https://github.com/lokesh-katari/coderealm_frontend/assets/111894942/1a4c63b3-a781-445a-87fe-800b90d2e607
 
 ## Contributing
 
