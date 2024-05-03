@@ -6,7 +6,7 @@
 
 CodeRealm is a platform for coding evaluation and question evaluation that supports multiple programming languages. It enables users to compile and evaluate code snippets in languages such as Java, C++, Python, JavaScript, and Golang, ans also supports 10+ programming languages .It also has the frontend web editor builtin for HTML,CSS and JS . The application was originally built as a monolithic MERN stack application, but has been migrated to microservices architecture with Golang as the backend and Next.js as the frontend.
 ## Frontend Repo Link :
- - [Coderealm frontend](https://github.com/lokesh-katari/coderealm_frontend)
+ - [Coderealm frontend](https://github.com/lokesh-katari/coderealm_frontend)  -- Next.js app
 
 ## Architecture
 ![code final asdf](https://github.com/lokesh-katari/CodeRealm_microservices/assets/111894942/793cb4f8-2f63-4219-a285-e4113e4af6a3)
@@ -17,15 +17,16 @@ CodeRealm is a platform for coding evaluation and question evaluation that suppo
 ## Tech Stack
 
 - **Backend**: GoLang
-- **Communication Protocol**: gRPC ,http
+- **Communication Protocol**: gRPC ,REST
 - **Database ORM**: Prisma (MongoDB)
 - **Caching**: Redis
 - **User Database**: PostgreSQL
 - **Data Storage**: MongoDB
 - **Message Queue**: Kafka
 - **Containerization**: Docker
-- **Web Proxy**: Envoy Proxy
+- **Web Proxy**: Envoy Proxy for the grpc server to web client
 - **Frontend**: Next.js
+- **Styling**: Shadcn UI , Tailwind css
 - **Deployment**: Docker Compose, Kubernetes
 
 
@@ -81,6 +82,7 @@ make sure that you specify the namespace before deployment ,here :coderealm
 
 1. Deploy the Kubernetes manifests in the `deployments/` directory:
 
+
    ```bash
    kubectl create ns coderealm 
    kubectl apply -f deployments/
@@ -97,6 +99,9 @@ make sure that you specify the namespace before deployment ,here :coderealm
   kubectl port-forward service/code-frontend-service 8000:8000 -n coderealm
 
   ```
+# Minikube Deployment Archtecture:
+
+![coderealm kubernetes](https://github.com/lokesh-katari/CodeRealm_microservices/assets/111894942/6073e1a4-dbb0-452a-bfe6-c0aef4d22708)
 
 ## Contributing
 
@@ -105,4 +110,3 @@ Contributions are welcome! Please feel free to fork the repository and submit pu
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
-
